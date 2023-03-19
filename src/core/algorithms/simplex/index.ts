@@ -4,12 +4,18 @@ import gauss from "@/core/algorithms/gauss";
 import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
 import Coefficient from "@/core/domain/math/classes/Coefficient";
 import Polynomial from "@/core/domain/math/classes/Polynomial";
+import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
 
 export function simplexMethod(
     targetFunction: TargetFunction,
     constraints: Array<Equation>,
     selectedColumnIndexes: Array<number>
 ) {
+    if (targetFunction.extremumType === ExtremumType.MAXIMUM) {
+        targetFunction.func.coefficients.forEach((el) => el.multiplier *= (-1))
+        targetFunction.extremumType = ExtremumType.MINIMUM
+    }
+
     const allColumnIndexes = [...Array(targetFunction.func.coefficients.length).keys()]
     const copyTF = getCopyTargetFunction(targetFunction)
 
