@@ -1,0 +1,3 @@
+export enum GaussState {
+    TRIANGULATE, FULL_TRIANGULATION, DIAGONALIZING
+}

@@ -73,6 +73,11 @@ code {
   text-align: center;
 }
 
+#jxgbox {
+  height: 100vh;
+  width: 100vw;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
