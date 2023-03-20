@@ -1,9 +1,8 @@
 import {Matrix} from "@/core/domain/math/aliases/Matrix";
 import {TargetFunction} from "@/core/domain/math/classes/simplex/TargetFunction";
 import {Equation} from "@/core/domain/math/classes/Equation";
-import {buildTwoDimensionalArray} from "@/core/algorithms/simplex/additional";
-
-type MatrixElement = {multiplier: number, rowIndex?: number, columnIndex?: number}
+import {buildTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
+import {MatrixElement} from "@/core/domain/math/classes/simplex/MatrixElement";
 
 export default class SimplexMatrix {
 

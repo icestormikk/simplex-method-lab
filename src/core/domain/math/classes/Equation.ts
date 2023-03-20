@@ -1,7 +1,7 @@
 import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {Matrix} from "@/core/domain/math/aliases/Matrix";
 import {coefficientValidator} from "@/core/validators/coefficientIndexValidator";
-import {buildTwoDimensionalArray} from "@/core/algorithms/simplex/additional";
+import {buildTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
 
 export class Equation {
     constructor(

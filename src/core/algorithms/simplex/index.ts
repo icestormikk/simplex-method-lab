@@ -5,6 +5,31 @@ import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
 import Coefficient from "@/core/domain/math/classes/Coefficient";
 import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
+import {store} from "@/redux/store";
+import {addStep} from "@/redux/slices/SimplexState";
+import {copyTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
+import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
+
+function appendSimplexStep(simplexMatrix: SimplexMatrix, bearingElement: MatrixElement) {
+    if (bearingElement.rowIndex === undefined || bearingElement.columnIndex === undefined) {
+        console.warn('Can\'t add a reference element with an undefined column or row index')
+        return
+    }
+
+    store.dispatch(
+        addStep({
+            simplexSnapshot: new SimplexMatrix(
+                [...simplexMatrix.rows],
+                [...simplexMatrix.columns],
+                copyTwoDimensionalArray(simplexMatrix.coefficientsMatrix)
+            ),
+            bearingElement: {
+                row: bearingElement.rowIndex,
+                column: bearingElement.columnIndex
+            }
+        })
+    )
+}
 
 export function simplexMethod(
     targetFunction: TargetFunction,
@@ -12,8 +37,7 @@ export function simplexMethod(
     selectedColumnIndexes: Array<number>
 ) {
     if (targetFunction.extremumType === ExtremumType.MAXIMUM) {
-        targetFunction.func.coefficients.forEach((el) => el.multiplier *= (-1))
-        targetFunction.extremumType = ExtremumType.MINIMUM
+        targetFunction.reverse()
     }
 
     const allColumnIndexes = [...Array(targetFunction.func.coefficients.length).keys()]
@@ -52,15 +76,21 @@ export function simplexMethod(
 
         try {
             element = simplexMatrix.findBearingElement(cols)
+            if (!element) {
+                throw new Error('Bearing element is undefined!')
+            }
         } catch (e: any) {
             throw new Error(`Cant find the bearing element: ${e.message}`)
         }
+        appendSimplexStep(simplexMatrix, element);
 
         console.log(element)
         console.log(simplexMatrix.rows, simplexMatrix.columns)
 
         simplexMatrix = simplexMatrix.makeStep(element!)
     }
+    appendSimplexStep(simplexMatrix, {columnIndex: -1, multiplier: -1, rowIndex: -1});
+
     console.log(simplexMatrix)
     const coefficients = extractCoefficients(simplexMatrix)
     const result = copyTF.func.getValueIn(...coefficients.map((el) => el.multiplier))

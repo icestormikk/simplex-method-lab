@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        font-weight: 400;
+
+        color-scheme: light dark;
+        color: rgba(255, 255, 255, 0.87);
+        background-color: #242424;
+
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-text-size-adjust: 100%;
+    }
+}
+
+@layer components {
+    a {
+        font-weight: 500;
+        color: #646cff;
+        text-decoration: inherit;
+    }
+    a:hover {
+        color: #535bf2;
+    }
+
+    body {
+        margin: 0;
+        display: flex;
+        place-items: center;
+        min-width: 320px;
+        min-height: 100vh;
+    }
+
+    h1 {
+        font-size: 2.2em;
+        line-height: 1.1;
+    }
+
+    button {
+        border: 1px solid transparent;
+        padding: 0.6em 1.2em;
+        font-size: 1em;
+        font-weight: 500;
+        font-family: inherit;
+        background-color: #1a1a1a;
+        cursor: pointer;
+        transition: border-color 0.25s;
+    }
+    button:hover {
+        border-color: #646cff;
+    }
+    button:focus,
+    button:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
+
+    code {
+        background-color: #1a1a1a;
+        padding: 2px 4px;
+        margin: 0 4px;
+        border-radius: 4px;
+    }
+}
+
+@layer components {
+    .centered {
+        @apply
+        flex items-center justify-center
+    }
+    #root {
+        @apply
+        h-screen w-screen centered
+    }
+    .App {
+        @apply
+        centered flex-col w-full h-full relative
+    }
+    .steps-container {
+        @apply
+        w-full flex justify-start items-center gap-2 flex-col px-2
+    }
+    .simplex-step {
+        @apply
+        w-full h-max px-1 py-3 my-2 hover:bg-gray-300/60 relative flex
+        justify-start items-center gap-4 rounded-md border-gray-300
+        border-[1px]
+    }
+    .simplex-step-number-block {
+        @apply
+        centered font-bold text-[1.2rem] text-white rounded-md p-2 bg-gray-500
+        h-8 w-8
+    }
+    .simplex-step:hover .simplex-step-number-block {
+        @apply
+        bg-green-600
+    }
+    .fog-block {
+        @apply
+        absolute top-0 left-0 h-full w-full bg-white/50 hidden
+    }
+    .steps-container:hover {
+        @apply
+        bg-gray-100/80 duration-200 transition-all
+    }
+    .steps-container:hover .simplex-step:not(:hover) .fog-block {
+        @apply
+        flex
+    }
+    .steps-container .simplex-step {
+        @apply
+        bg-white/10
+    }
+    .menu-item {
+        @apply
+        text-base bg-gray-200 text-gray-600 py-0.5 px-2 centered flex-row
+        gap-2
+    }
+    .menu-item:not(:last-child) {
+        @apply
+        border-r-[1px] border-r-gray-400
+    }
+    .simplex-matrix-table td {
+        @apply
+        h-10 w-16 border-[1px] border-gray-300 hover:bg-gray-300/50
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+    a:hover {
+        color: #747bff;
+    }
+    button {
+        background-color: #f9f9f9;
+    }
+    code {
+        background-color: #f9f9f9;
+    }
+}
