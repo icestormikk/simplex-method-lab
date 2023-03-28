@@ -4,6 +4,7 @@ import {Equation} from "@/core/domain/math/classes/Equation";
 import {buildTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
 import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 import {ROUNDING_ACCURACY} from "@/core/constants";
+import {normalize} from "@/core/algorithms/numberhelper";
 
 export default class SimplexMatrix {
 
@@ -26,20 +27,22 @@ export default class SimplexMatrix {
 
         constraints.forEach((constraint, eqIndex) => {
             result[eqIndex] = []
-            constraint.polynomial.coefficients.forEach((coefficient) => {
-                if (columns.includes(coefficient.index)) {
-                    result[eqIndex].push(
-                        coefficient.multiplier
-                    )
-                }
+            columns.forEach((column) => {
+                const coefficient = constraint.polynomial.coefficients.find((el) =>
+                    el.index === column
+                )
+                result[eqIndex].push(coefficient ? coefficient.multiplier : 0)
             })
             result[eqIndex].push(constraint.value)
         })
 
         result[lastRowIndex] = []
-        target.func.coefficients.forEach((coefficient) => {
-            if (columns.includes(coefficient.index)) {
-                result[lastRowIndex].push(coefficient.multiplier)
+        columns.forEach((column) => {
+            const coefficient = target.func.coefficients.find((el) =>
+                el.index === column
+            )
+            if (coefficient) {
+                result[lastRowIndex].push(coefficient ? coefficient.multiplier : 0)
             }
         })
         result[lastRowIndex].push(
@@ -87,8 +90,8 @@ export default class SimplexMatrix {
             if (i === element.columnIndex) {
                 continue
             }
-            target[element.rowIndex!][i] = +(1.0 / element.multiplier *
-                source[element.rowIndex!][i]).toFixed(ROUNDING_ACCURACY)
+            target[element.rowIndex!][i] = normalize(1.0 / element.multiplier *
+                source[element.rowIndex!][i])
         }
     }
 
@@ -99,8 +102,8 @@ export default class SimplexMatrix {
             if (i === element.rowIndex) {
                 continue
             }
-            target[i][element.columnIndex!] = +(-1.0 / element.multiplier *
-                source[i][element.columnIndex!]).toFixed(ROUNDING_ACCURACY)
+            target[i][element.columnIndex!] = normalize(-1.0 / element.multiplier *
+                source[i][element.columnIndex!])
         }
     }
 
@@ -116,14 +119,25 @@ export default class SimplexMatrix {
                     continue
                 }
 
-                target[i][j] = +(source[i][j]).toFixed(ROUNDING_ACCURACY) - +(source[i][element.columnIndex!]
-                    * target[element.rowIndex!][j]).toFixed(ROUNDING_ACCURACY)
-                console.log(`${source[i][j]} - ${source[i][element.columnIndex!]} * ${target[element.rowIndex!][j]} === ${target[i][j]}`)
+                target[i][j] = normalize(source[i][j] - source[i][element.columnIndex!]
+                    * target[element.rowIndex!][j])
             }
         }
     }
 
     findPossibleBearingColumns() : Array<MatrixElement> {
+        function findAbsoluteMaximum(source: Array<MatrixElement>) : MatrixElement {
+            let max = source[0]
+            source.forEach((element) => {
+                const value = Math.abs(element.multiplier);
+                if (value > Math.abs(max.multiplier)) {
+                    max = element
+                }
+            })
+
+            return max
+        }
+
         const result: Array<MatrixElement> = []
         const lastRowIndex = this.coefficientsMatrix.length - 1
 
@@ -134,13 +148,12 @@ export default class SimplexMatrix {
             }
         }
 
-        return result
+        return [findAbsoluteMaximum(result)]
     }
 
     findBearingElement(
         possibleBearingColumns: Array<MatrixElement>
     ) : MatrixElement | undefined {
-        console.log(`Columns: ${possibleBearingColumns}`)
         this.isSafe(possibleBearingColumns)
         let min: MatrixElement | undefined
         let minDiv = Number.MAX_VALUE

@@ -70,7 +70,7 @@ function App() {
 
     const action = () => {
         const tf1 = new TargetFunction(
-            Polynomial.fromNumbersArray([-1, 10, -1]), ExtremumType.MAXIMUM
+            Polynomial.fromNumbersArray([-1, 10, -1]), ExtremumType.MINIMUM
         )
         const constraints = [
             new Equation(Polynomial.fromNumbersArray([-1, 5, 7]), 13),
