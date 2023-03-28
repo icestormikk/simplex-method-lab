@@ -1,9 +1,11 @@
 import {configureStore} from "@reduxjs/toolkit";
 import {simplexReducer} from "@/redux/slices/SimplexState";
+import {mainStateReducer} from "@/redux/slices/MainState";
 
 export const store = configureStore({
     reducer: {
-        simplex: simplexReducer
+        simplex: simplexReducer,
+        main: mainStateReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

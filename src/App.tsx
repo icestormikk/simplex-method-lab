@@ -2,14 +2,13 @@ import './index.css'
 import React from "react";
 import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {Equation} from "@/core/domain/math/classes/Equation";
-import {simplexMethod} from "@/core/algorithms/simplex";
 import {TargetFunction} from "@/core/domain/math/classes/simplex/TargetFunction";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
 import {useAppDispatch} from "@/redux/hooks";
-import {setSteps} from "@/redux/slices/SimplexState";
-import StepsList from "@/interface/StepsInfo/StepsList";
-import Menu from "@/interface/Menu/Menu";
 import {BiDownload, BiUpload} from "react-icons/all";
+import TabPane from "@/interface/tabpane/TabPane";
+import ConstraintsMenu from "@/interface/Menu/constraints/ConstraintsMenu";
+import {artificialBasisMethod} from "@/core/algorithms/simplex/artificial";
 
 function App() {
     const dispatch = useAppDispatch()
@@ -35,37 +34,62 @@ function App() {
         }, []
     )
 
+    const tabs = React.useMemo(
+        () => {
+            return [
+                {
+                    tab: {
+                        title: 'Условия задачи',
+                        icon: undefined,
+                        action: () => {
+                            console.log(0)
+                        },
+                        isBlocked: false
+                    },
+                    content: (
+                        <ConstraintsMenu/>
+                    )
+                },
+                {
+                    tab: {
+                        title: 'Симплекс-метод',
+                        icon: undefined,
+                        action: () => {
+                            console.log(1)
+                        },
+                        isBlocked: false
+                    },
+                    content: (
+                        <h1>World</h1>
+                    )
+                }
+            ]
+        },
+        []
+    )
+
     const action = () => {
         const tf1 = new TargetFunction(
-            Polynomial.fromNumbersArray([3, -2, 1, 3, 3]), ExtremumType.MAXIMUM
+            Polynomial.fromNumbersArray([-1, 10, -1]), ExtremumType.MAXIMUM
         )
         const constraints = [
-            new Equation(Polynomial.fromNumbersArray([2, -1, 1, 1, 1]), 2),
-            new Equation(Polynomial.fromNumbersArray([-4, 3, -1, -1, -3]), -4),
-            new Equation(Polynomial.fromNumbersArray([3, 2, 3, 5, 0]), 3),
+            new Equation(Polynomial.fromNumbersArray([-1, 5, 7]), 13),
+            new Equation(Polynomial.fromNumbersArray([1, 14.5, 7]), 15),
         ]
 
-        simplexMethod(tf1, constraints, [0, 1, 2])
+        // simplexMethod(tf1, constraints, [0, 1, 2])
+        artificialBasisMethod(tf1, constraints)
     }
 
     return (
         <div className="App">
-            <Menu items={items}/>
-            <div className="centered flex-row gap-2">
-                <button
-                    type="button"
-                    onClick={action}
-                >
-                    Test
-                </button>
-                <button
-                    type="button"
-                    onClick={() => dispatch(setSteps([]))}
-                >
-                    Reset
-                </button>
-            </div>
-            <StepsList/>
+            <TabPane tabs={tabs}/>
+            <button
+                type="button"
+                onClick={() => action()}
+            >
+                Test
+            </button>
         </div>
     )
 }

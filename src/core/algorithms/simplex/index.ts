@@ -34,7 +34,7 @@ function appendSimplexStep(simplexMatrix: SimplexMatrix, bearingElement: MatrixE
 export function simplexMethod(
     targetFunction: TargetFunction,
     constraints: Array<Equation>,
-    selectedColumnIndexes: Array<number>
+    selectedColumnIndexes: Array<number>,
 ) {
     if (targetFunction.extremumType === ExtremumType.MAXIMUM) {
         targetFunction.reverse()
@@ -69,6 +69,22 @@ export function simplexMethod(
         targetFunction, equations, allColumnIndexes, selectedColumnIndexes
     )
 
+    simplexMatrix = passDefaultSimplexMethod(simplexMatrix);
+    appendSimplexStep(
+        simplexMatrix,
+        {columnIndex: -1, multiplier: -1, rowIndex: -1}
+    );
+
+    console.log(simplexMatrix)
+    const coefficients = extractCoefficients(simplexMatrix)
+    const result = copyTF.func.getValueIn(...coefficients.map((el) => el.multiplier))
+    console.log(
+        'x: (' + coefficients.map((el) => `${el.multiplier}`).join(', ') + ')'
+    )
+    console.log(`f(x): ${result}`)
+}
+
+export function passDefaultSimplexMethod(simplexMatrix: SimplexMatrix) {
     while (!isSolution(simplexMatrix)) {
         console.log(simplexMatrix)
         const cols = simplexMatrix.findPossibleBearingColumns()
@@ -89,15 +105,7 @@ export function simplexMethod(
 
         simplexMatrix = simplexMatrix.makeStep(element!)
     }
-    appendSimplexStep(simplexMatrix, {columnIndex: -1, multiplier: -1, rowIndex: -1});
-
-    console.log(simplexMatrix)
-    const coefficients = extractCoefficients(simplexMatrix)
-    const result = copyTF.func.getValueIn(...coefficients.map((el) => el.multiplier))
-    console.log(
-        'x: (' + coefficients.map((el) => `${el.multiplier}`).join(', ') + ')'
-    )
-    console.log(`f(x): ${result}`)
+    return simplexMatrix;
 }
 
 function isSolution(simplexMatrix: SimplexMatrix) : boolean {
@@ -113,7 +121,7 @@ function isSolution(simplexMatrix: SimplexMatrix) : boolean {
     return true
 }
 
-function extractCoefficients(simplexMatrix: SimplexMatrix) : Array<Coefficient> {
+export function extractCoefficients(simplexMatrix: SimplexMatrix) : Array<Coefficient> {
     const {rows, columns, coefficientsMatrix} = simplexMatrix
     const coefficients: Array<number> = Array(rows.length + columns.length).fill(0)
     const lastColumnIndex = coefficientsMatrix[0].length - 1
@@ -122,10 +130,12 @@ function extractCoefficients(simplexMatrix: SimplexMatrix) : Array<Coefficient> 
         coefficients[rowIndex] = coefficientsMatrix[index][lastColumnIndex]
     })
 
-    return coefficients.map((el, index) => new Coefficient(el, index))
+    return coefficients.map((el, index) =>
+        new Coefficient(el, index)
+    )
 }
 
-function getCopyTargetFunction(source: TargetFunction) : TargetFunction {
+export function getCopyTargetFunction(source: TargetFunction) : TargetFunction {
     const {func, extremumType} = source
     const {coefficients, constant} = func
     const newCoefficients = coefficients.map((el) => new Coefficient(el.multiplier, el.index))

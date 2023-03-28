@@ -18,6 +18,15 @@
         -moz-osx-font-smoothing: grayscale;
         -webkit-text-size-adjust: 100%;
     }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number]{
+        -moz-appearance: textfield;
+    }
 }
 
 @layer components {
@@ -45,7 +54,6 @@
 
     button {
         border: 1px solid transparent;
-        padding: 0.6em 1.2em;
         font-size: 1em;
         font-weight: 500;
         font-family: inherit;
@@ -80,7 +88,7 @@
     }
     .App {
         @apply
-        centered flex-col w-full h-full relative
+        flex justify-start items-start flex-col w-full h-full relative
     }
     .steps-container {
         @apply
@@ -128,7 +136,34 @@
     }
     .simplex-matrix-table td {
         @apply
-        h-10 w-16 border-[1px] border-gray-300 hover:bg-gray-300/50
+        h-10 w-16 max-h-[2.5rem] max-w-[4rem] border-[1px] border-gray-300 hover:bg-gray-300/50
+        px-0.5 text-center font-bold
+    }
+    .simplex-matrix-table td.titled-cell {
+        @apply
+        bg-gray-200/80
+    }
+    .simplex-matrix-table input[type="number"] {
+        @apply
+        flex h-8 w-14 bg-transparent text-center
+    }
+    .tab-element {
+        @apply
+        centered text-base px-2 py-0.5 flex-row gap-1 border-t-[1px]
+        border-t-gray-400 border-x-[1px] border-x-gray-400
+    }
+    .tab-element:first-child {
+        @apply
+        rounded-tl-md ml-1
+    }
+    .tab-element:last-child {
+        @apply
+        rounded-tr-md
+    }
+    .constraints-menu-panel {
+        @apply
+        m-1 p-2 rounded-xl border-[1px] border-gray-300 shadow-md w-full flex
+        flex-col gap-2
     }
 }
 

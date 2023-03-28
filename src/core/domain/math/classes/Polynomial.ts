@@ -57,7 +57,7 @@ export default class Polynomial {
         )
 
         if (suitableCoefficientIndex === -1) {
-            throw new Error(`Index of replacing coefficient does not exist in this polynomial: ${index}`)
+            throw new Error(`Index of replacing coefficient does not exist in this polynomial: ${index}, ${replacement.toString()}`)
         }
 
         replacement.coefficients.forEach((coefficient) =>

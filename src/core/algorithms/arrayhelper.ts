@@ -18,3 +18,17 @@ export function copyTwoDimensionalArray<T>(source: Matrix<T>) : Matrix<T> {
 
     return result
 }
+
+export function deleteColumnByIndex<T>(source: Matrix<T>, index: number) {
+    if (index < 0) {
+        throw new Error('Index can not be negative!')
+    }
+
+    for (let i = 0; i < source.length; i++) {
+        if (index >= source[i].length) {
+            console.warn(`Can not delete element with index ${index} in line ${i}. It does not exist.`)
+            continue
+        }
+        source[i].splice(index, 1)
+    }
+}

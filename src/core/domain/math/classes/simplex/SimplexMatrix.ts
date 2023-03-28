@@ -2,7 +2,8 @@ import {Matrix} from "@/core/domain/math/aliases/Matrix";
 import {TargetFunction} from "@/core/domain/math/classes/simplex/TargetFunction";
 import {Equation} from "@/core/domain/math/classes/Equation";
 import {buildTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
-import {MatrixElement} from "@/core/domain/math/classes/simplex/MatrixElement";
+import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
+import {ROUNDING_ACCURACY} from "@/core/constants";
 
 export default class SimplexMatrix {
 
@@ -27,7 +28,9 @@ export default class SimplexMatrix {
             result[eqIndex] = []
             constraint.polynomial.coefficients.forEach((coefficient) => {
                 if (columns.includes(coefficient.index)) {
-                    result[eqIndex].push(coefficient.multiplier)
+                    result[eqIndex].push(
+                        coefficient.multiplier
+                    )
                 }
             })
             result[eqIndex].push(constraint.value)
@@ -39,7 +42,9 @@ export default class SimplexMatrix {
                 result[lastRowIndex].push(coefficient.multiplier)
             }
         })
-        result[lastRowIndex].push(target.func.constant * (-1))
+        result[lastRowIndex].push(
+            target.func.constant ? target.func.constant * (-1) : 0
+        )
 
         return new SimplexMatrix(rows, columns, result)
     }
@@ -82,8 +87,8 @@ export default class SimplexMatrix {
             if (i === element.columnIndex) {
                 continue
             }
-            target[element.rowIndex!][i] = 1.0 / element.multiplier *
-                source[element.rowIndex!][i]
+            target[element.rowIndex!][i] = +(1.0 / element.multiplier *
+                source[element.rowIndex!][i]).toFixed(ROUNDING_ACCURACY)
         }
     }
 
@@ -94,8 +99,8 @@ export default class SimplexMatrix {
             if (i === element.rowIndex) {
                 continue
             }
-            target[i][element.columnIndex!] = -1.0 / element.multiplier *
-                source[i][element.columnIndex!]
+            target[i][element.columnIndex!] = +(-1.0 / element.multiplier *
+                source[i][element.columnIndex!]).toFixed(ROUNDING_ACCURACY)
         }
     }
 
@@ -111,7 +116,9 @@ export default class SimplexMatrix {
                     continue
                 }
 
-                target[i][j] = source[i][j] - source[i][element.columnIndex!] * target[element.rowIndex!][j]
+                target[i][j] = +(source[i][j]).toFixed(ROUNDING_ACCURACY) - +(source[i][element.columnIndex!]
+                    * target[element.rowIndex!][j]).toFixed(ROUNDING_ACCURACY)
+                console.log(`${source[i][j]} - ${source[i][element.columnIndex!]} * ${target[element.rowIndex!][j]} === ${target[i][j]}`)
             }
         }
     }
@@ -133,6 +140,7 @@ export default class SimplexMatrix {
     findBearingElement(
         possibleBearingColumns: Array<MatrixElement>
     ) : MatrixElement | undefined {
+        console.log(`Columns: ${possibleBearingColumns}`)
         this.isSafe(possibleBearingColumns)
         let min: MatrixElement | undefined
         let minDiv = Number.MAX_VALUE
@@ -162,7 +170,7 @@ export default class SimplexMatrix {
         bearingElement: MatrixElement
     ) : SimplexMatrix {
         if (bearingElement.rowIndex === undefined || bearingElement.columnIndex === undefined) {
-            throw new Error('Illegal state: row index or column index is null')
+            throw new Error('Illegal state: row index or column index is undefined')
         }
 
         const coefficientMatrix = buildTwoDimensionalArray<number>(
@@ -177,7 +185,7 @@ export default class SimplexMatrix {
         newRows[bearingElement.rowIndex] = newColumns[bearingElement.columnIndex]
         newColumns[bearingElement.columnIndex] = temp
 
-        coefficientMatrix[rowIndex][columnIndex] = 1.0 / multiplier
+        coefficientMatrix[rowIndex][columnIndex] = +(1.0 / multiplier).toFixed(ROUNDING_ACCURACY)
         SimplexMatrix.fillBearingRow(
             this.coefficientsMatrix, coefficientMatrix, bearingElement
         )

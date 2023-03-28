@@ -18,6 +18,7 @@ export class TargetFunction {
         return this
     }
 
+
     public toString() : string {
         return this.func.toString() + ` -> ${this.extremumType.valueOf()}`
     }

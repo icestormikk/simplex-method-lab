@@ -2,7 +2,11 @@ export class Rational {
     constructor(
         public numerator: number,
         public denominator: number
-    ) {}
+    ) {
+        if (denominator === 0) {
+            throw new Error('Can not create Rational object with zero denominator')
+        }
+    }
 
     static fromNumber(value: number) : Rational {
         const maxDenominator = 10000
@@ -26,6 +30,32 @@ export class Rational {
         }
 
         return new Rational(bestRational.numerator, bestRational.denominator)
+    }
+
+    add(value: Rational) : Rational {
+        const {numerator, denominator} = Rational.fromNumber(this.toNumber() + value.toNumber())
+        this.numerator = numerator
+        this.denominator = denominator
+        return this
+    }
+
+    subtraction(value: Rational) : Rational {
+        return this.add(
+            new Rational(value.numerator * (-1), value.denominator)
+        )
+    }
+
+    multiply(value: Rational) : Rational {
+        const {numerator, denominator} = Rational.fromNumber(this.toNumber() * value.toNumber())
+        this.numerator = numerator
+        this.denominator = denominator
+        return this
+    }
+
+    divide(value: Rational) : Rational {
+        return this.multiply(
+            new Rational(value.denominator, value.numerator)
+        )
     }
 
     toNumber() : number {

@@ -1,7 +1,7 @@
 import Coefficient from "@/core/domain/math/classes/Coefficient";
 
 export function coefficientValidator(coefficient?: Coefficient) {
-    if (!coefficient) {
+    if (coefficient === undefined) {
         throw new Error(`Coefficient does not exist.`)
     }
     if (coefficient.multiplier === 0) {
