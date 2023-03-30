@@ -18,6 +18,20 @@ export class TargetFunction {
         return this
     }
 
+    isEmpty() : boolean {
+        let result = true
+        this.func.coefficients.forEach((coefficient) => {
+            if (coefficient.multiplier !== 0) {
+                result = false
+            }
+        })
+
+        if (this.func.constant !== 0) {
+            result = false
+        }
+
+        return result;
+    }
 
     public toString() : string {
         return this.func.toString() + ` -> ${this.extremumType.valueOf()}`

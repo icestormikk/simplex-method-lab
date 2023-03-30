@@ -126,17 +126,17 @@ export default class SimplexMatrix {
     }
 
     findPossibleBearingColumns() : Array<MatrixElement> {
-        function findAbsoluteMaximum(source: Array<MatrixElement>) : MatrixElement {
-            let max = source[0]
-            source.forEach((element) => {
-                const value = Math.abs(element.multiplier);
-                if (value > Math.abs(max.multiplier)) {
-                    max = element
-                }
-            })
-
-            return max
-        }
+        // function findAbsoluteMaximum(source: Array<MatrixElement>) : MatrixElement {
+        //     let max = source[0]
+        //     source.forEach((element) => {
+        //         const value = Math.abs(element.multiplier);
+        //         if (value > Math.abs(max.multiplier)) {
+        //             max = element
+        //         }
+        //     })
+        //
+        //     return max
+        // }
 
         const result: Array<MatrixElement> = []
         const lastRowIndex = this.coefficientsMatrix.length - 1
@@ -148,13 +148,14 @@ export default class SimplexMatrix {
             }
         }
 
-        return [findAbsoluteMaximum(result)]
+        return result
     }
 
-    findBearingElement(
+    findBearingElements(
         possibleBearingColumns: Array<MatrixElement>
-    ) : MatrixElement | undefined {
+    ) : {element: MatrixElement | undefined, possibleElements: Array<MatrixElement>} {
         this.isSafe(possibleBearingColumns)
+        const possibleElements: Array<MatrixElement> = []
         let min: MatrixElement | undefined
         let minDiv = Number.MAX_VALUE
 
@@ -169,14 +170,17 @@ export default class SimplexMatrix {
                 }
 
                 const div = this.coefficientsMatrix[i][this.coefficientsMatrix[i].length - 1] / element
+                const elementAsObject = {multiplier: element, rowIndex: i, columnIndex: column.columnIndex}
+
+                possibleElements.push(elementAsObject)
                 if (min === undefined || div < minDiv) {
                     minDiv = div
-                    min = {multiplier: element, rowIndex: i, columnIndex: column.columnIndex}
+                    min = elementAsObject
                 }
             }
         }
 
-        return min
+        return {element: min, possibleElements}
     }
 
     makeStep(

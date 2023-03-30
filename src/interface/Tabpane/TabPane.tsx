@@ -1,5 +1,5 @@
 import React, {ReactNode} from 'react';
-import TabsList from "@/interface/tabpane/TabsList";
+import TabsList from "@/interface/Tabpane/TabsList";
 import {Tab} from "@/interface/types/Tab";
 
 interface TabPaneProps {
@@ -18,7 +18,7 @@ function TabPane({tabs}: TabPaneProps) {
                 tabIndexChanger={setSelectedTabIndex}
             />
             <div
-                className="border-t-[1px] border-t-gray-400 w-full px-2 py-1"
+                className="border-t-[1px] border-t-gray-400 w-full pr-2 pt-2"
             >
                 {
                     tabs[selectedTabIndex].content

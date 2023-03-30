@@ -75,12 +75,21 @@
         margin: 0 4px;
         border-radius: 4px;
     }
+
+    .adaptive-flex {
+        @apply
+        flex md:flex-row flex-col
+    }
 }
 
 @layer components {
     .centered {
         @apply
         flex items-center justify-center
+    }
+    .bordered {
+        @apply
+        border-gray-300 border-[1px]
     }
     #root {
         @apply
@@ -127,12 +136,16 @@
     }
     .menu-item {
         @apply
-        text-base bg-gray-200 text-gray-600 py-0.5 px-2 centered flex-row
-        gap-2
+        text-sm bg-gray-200 text-gray-600 py-0.5 px-2 flex flex-row
+        gap-2 bordered justify-start items-center w-44 rounded-none
     }
     .menu-item:not(:last-child) {
         @apply
         border-r-[1px] border-r-gray-400
+    }
+    .simplex-matrix-table {
+        @apply
+        w-max
     }
     .simplex-matrix-table td {
         @apply
@@ -150,7 +163,7 @@
     .tab-element {
         @apply
         centered text-base px-2 py-0.5 flex-row gap-1 border-t-[1px]
-        border-t-gray-400 border-x-[1px] border-x-gray-400
+        border-t-gray-300 border-x-[1px] border-x-gray-300
     }
     .tab-element:first-child {
         @apply

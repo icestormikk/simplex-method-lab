@@ -36,7 +36,7 @@ function ConstraintsMenu() {
     }
 
     return (
-        <div>
+        <div className="flex justify-start items-start flex-col">
             <CurrentTargetFunctionBlock/>
             <div className="constraints-menu-panel">
                 <b>Коэффициенты целевой функции и ограничений:</b>
@@ -47,7 +47,7 @@ function ConstraintsMenu() {
                     }}
                 />
             </div>
-            <div className="centered w-full">
+            <div className="w-full adaptive-flex">
                 <div className="constraints-menu-panel">
                     <b>Задача оптимизации: </b>
                     <select

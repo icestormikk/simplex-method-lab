@@ -1,13 +1,27 @@
 import React from 'react';
 import {Rational} from "@/core/domain/math/classes/Rational";
 import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
+import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 
 interface SimpleMatrixTableProps<T> {
     matrix: SimplexMatrix,
-    selectedElement: {row: number, column: number}
+    selectedElement: MatrixElement,
+    possibleBearingElements: Array<MatrixElement>
 }
 
-function SimplexMatrixTable({matrix, selectedElement}: SimpleMatrixTableProps<number>) {
+function SimplexMatrixTable({matrix, selectedElement, possibleBearingElements}: SimpleMatrixTableProps<number>) {
+    const isPossibleElement = (row: number, column: number) => {
+        const index = possibleBearingElements.findIndex((el) =>
+            el.rowIndex === row && el.columnIndex === column
+        )
+
+        return index > -1
+    }
+
+    const isSelectedElement = (row: number, column: number) => {
+        return selectedElement.rowIndex === row && selectedElement.columnIndex === column
+    }
+
     return (
         <table className="simplex-matrix-table text-2xl">
             <tbody>
@@ -32,8 +46,14 @@ function SimplexMatrixTable({matrix, selectedElement}: SimpleMatrixTableProps<nu
                                 array.map((element, elIndex) => (
                                     <td
                                         key={elIndex}
-                                        className={(selectedElement.row === index && selectedElement.column === elIndex) ?
-                                        'bg-green-500/50' : ''}
+                                        className={(
+                                            isSelectedElement(index, elIndex))
+                                                ? `bg-bearing-element-color/50` :
+                                            (isPossibleElement(index, elIndex)
+                                                ? 'bg-possible-bearing-element-color/50' :
+                                                ''
+                                            )
+                                        }
                                         onClick={() => {
                                             console.log(element)
                                         }}

@@ -10,7 +10,11 @@ import {addStep} from "@/redux/slices/SimplexState";
 import {copyTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
 import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 
-function appendSimplexStep(simplexMatrix: SimplexMatrix, bearingElement: MatrixElement) {
+export function appendSimplexStep(
+    simplexMatrix: SimplexMatrix,
+    bearingElement: MatrixElement,
+    possibleElements: Array<MatrixElement> = []
+) {
     if (bearingElement.rowIndex === undefined || bearingElement.columnIndex === undefined) {
         console.warn('Can\'t add a reference element with an undefined column or row index')
         return
@@ -23,10 +27,8 @@ function appendSimplexStep(simplexMatrix: SimplexMatrix, bearingElement: MatrixE
                 [...simplexMatrix.columns],
                 copyTwoDimensionalArray(simplexMatrix.coefficientsMatrix)
             ),
-            bearingElement: {
-                row: bearingElement.rowIndex,
-                column: bearingElement.columnIndex
-            }
+            bearingElement,
+            possibleBearingElements: possibleElements
         })
     )
 }
@@ -72,7 +74,8 @@ export function simplexMethod(
     simplexMatrix = passDefaultSimplexMethod(simplexMatrix);
     appendSimplexStep(
         simplexMatrix,
-        {columnIndex: -1, multiplier: -1, rowIndex: -1}
+        {columnIndex: -1, multiplier: -1, rowIndex: -1},
+        []
     );
 
     console.log(simplexMatrix)
@@ -88,22 +91,19 @@ export function passDefaultSimplexMethod(simplexMatrix: SimplexMatrix) {
     while (!isSolution(simplexMatrix)) {
         console.log(simplexMatrix)
         const cols = simplexMatrix.findPossibleBearingColumns()
-        let element
+        let bearingElements
 
         try {
-            element = simplexMatrix.findBearingElement(cols)
-            if (!element) {
+            bearingElements = simplexMatrix.findBearingElements(cols)
+            if (!bearingElements.element) {
                 throw new Error('Bearing element is undefined!')
             }
         } catch (e: any) {
             throw new Error(`Cant find the bearing element: ${e.message}`)
         }
-        appendSimplexStep(simplexMatrix, element);
+        appendSimplexStep(simplexMatrix, bearingElements.element, bearingElements.possibleElements);
 
-        console.log(element)
-        console.log(simplexMatrix.rows, simplexMatrix.columns)
-
-        simplexMatrix = simplexMatrix.makeStep(element!)
+        simplexMatrix = simplexMatrix.makeStep(bearingElements.element!)
     }
     return simplexMatrix;
 }

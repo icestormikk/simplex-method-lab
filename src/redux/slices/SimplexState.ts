@@ -1,13 +1,5 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
-
-type SimplexStepInfo = {
-    simplexSnapshot: SimplexMatrix,
-    bearingElement: {
-        row: number,
-        column: number
-    }
-}
+import {SimplexStepInfo} from "@/interface/types/SimplexStepInfo";
 
 interface SimplexState {
     steps: Array<SimplexStepInfo>
@@ -26,11 +18,14 @@ const simplexSlice = createSlice({
         },
         setSteps: (state, action: PayloadAction<Array<SimplexStepInfo>>) => {
             state.steps = action.payload
+        },
+        clearSteps: (state) => {
+            state.steps.splice(0, state.steps.length)
         }
     }
 })
 
 export const simplexReducer = simplexSlice.reducer
 export const {
-    addStep, setSteps
+    addStep, setSteps, clearSteps
 } = simplexSlice.actions

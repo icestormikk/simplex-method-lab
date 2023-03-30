@@ -7,24 +7,29 @@ import {Matrix} from "@/core/domain/math/aliases/Matrix";
 import {deleteColumnByIndex} from "@/core/algorithms/arrayhelper";
 import {Rational} from "@/core/domain/math/classes/Rational";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
-import {passDefaultSimplexMethod} from "@/core/algorithms/simplex";
+import {
+    appendSimplexStep,
+    extractCoefficients,
+    getCopyTargetFunction,
+    passDefaultSimplexMethod
+} from "@/core/algorithms/simplex";
 
 function passArtificialSimplexMethod(simplex: SimplexMatrix, additionalCoefficientIndexes: Array<number>) {
     while (!isArtificialSolution(simplex)) {
         const cols = simplex.findPossibleBearingColumns()
-        let element;
+        let bearingElements;
 
         try {
-            element = simplex.findBearingElement(cols)
-            console.log(element)
-            if (!element) {
+            bearingElements = simplex.findBearingElements(cols)
+            if (!bearingElements.element) {
                 throw new Error('Bearing element is undefined!')
             }
         } catch (e: any) {
             throw new Error(`Cant find the bearing element: ${e.message}`)
         }
+        appendSimplexStep(simplex, bearingElements.element, bearingElements.possibleElements)
 
-        simplex = simplex.makeStep(element)
+        simplex = simplex.makeStep(bearingElements.element)
         console.log(simplex)
         deleteUnnecessaryColumnsFrom(simplex, additionalCoefficientIndexes)
     }
@@ -36,21 +41,30 @@ export function artificialBasisMethod(
     constraints: Array<Equation>
 ) {
     validateArguments(target, constraints)
-    const appendedCoefficients = appendCoefficients(constraints)
+    const copiedTargetFunction = getCopyTargetFunction(target)
+    const copiedConstraints = copyConstraints(constraints)
+    const appendedCoefficients = appendCoefficients(copiedConstraints)
     const allIndexes = [...Array(appendedCoefficients[appendedCoefficients.length - 1].index + 1).keys()]
 
     let simplex = SimplexMatrix.fromMathObjects(
-        target, constraints, allIndexes,
+        copiedTargetFunction, copiedConstraints, allIndexes,
         appendedCoefficients.map((el) => el.index)
     )
     fillSimplexMatrixLastRow(simplex.coefficientsMatrix)
 
     simplex = passArtificialSimplexMethod(simplex, appendedCoefficients.map((el) => el.index))
-    const updatedSimplex = passToDefaultSimplex(target, simplex)
-    const result = passDefaultSimplexMethod(updatedSimplex)
-    result.coefficientsMatrix.forEach((array) => {
-        console.log(array.map((el) => Rational.fromNumber(el).toString()).join(', '))
-    })
+    appendSimplexStep(simplex, {columnIndex: -1, multiplier: -1, rowIndex: -1})
+
+    const updatedSimplex = passToDefaultSimplex(copiedTargetFunction, simplex)
+    const resultSimplex = passDefaultSimplexMethod(updatedSimplex)
+    appendSimplexStep(resultSimplex, {columnIndex: -1, multiplier: -1, rowIndex: -1})
+
+    const coefficients = extractCoefficients(resultSimplex)
+    const result = target.func.getValueIn(...coefficients.map((el) => el.multiplier))
+    console.log(
+        'x: (' + coefficients.map((el) => `${el.multiplier}`).join(', ') + ')'
+    )
+    console.log(`f(x): ${result}`)
 }
 
 function validateArguments(
@@ -69,6 +83,19 @@ function validateArguments(
             constraint.value *= -1
         }
     }
+}
+
+function copyConstraints(source: Array<Equation>) : Array<Equation> {
+    const result: Array<Equation> = []
+    for (const equation of source) {
+        result.push(
+            new Equation(
+                new Polynomial([...equation.polynomial.coefficients], equation.polynomial.constant),
+                equation.value
+            )
+        )
+    }
+    return result
 }
 
 function isArtificialSolution(simplexMatrix: SimplexMatrix) : boolean {
