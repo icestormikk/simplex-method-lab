@@ -51,7 +51,7 @@ function SimplexMatrixTable({matrix, selectedElement, possibleBearingElements}: 
                                                 ? `bg-bearing-element-color/50` :
                                             (isPossibleElement(index, elIndex)
                                                 ? 'bg-possible-bearing-element-color/50' :
-                                                ''
+                                                'bg-white'
                                             )
                                         }
                                         onClick={() => {

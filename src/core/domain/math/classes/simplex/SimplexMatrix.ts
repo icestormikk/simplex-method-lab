@@ -5,6 +5,13 @@ import {buildTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
 import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 import {ROUNDING_ACCURACY} from "@/core/constants";
 import {normalize} from "@/core/algorithms/numberhelper";
+import {Rational} from "@/core/domain/math/classes/Rational";
+
+function getCalculationsString(source: Array<number>, bearingElement: MatrixElement) {
+    return '(' + source.map((el, elIndex) =>
+        elIndex === bearingElement.columnIndex ? '*' : `${Rational.fromNumber(el)}`
+    ).join(', ') + ')';
+}
 
 export default class SimplexMatrix {
 
@@ -109,11 +116,22 @@ export default class SimplexMatrix {
 
     private static fullNonBearingRows(
         source: Matrix<number>, target: Matrix<number>, element: MatrixElement
-    ) {
+    ) : Array<string> {
+        const content: Array<string> = []
+
         for (let i = 0; i < target.length; i++) {
             if (i === element.rowIndex) {
                 continue
             }
+
+            const calculationsString = getCalculationsString(source[i], element).concat(
+                ((-1) * source[i][element.columnIndex!] >= 0 ? '+' : '') + `${
+                    Rational.fromNumber((-1) * source[i][element.columnIndex!])
+                }*${
+                    getCalculationsString(target[element.rowIndex!], element)
+                }`
+            )
+
             for (let j = 0; j < target[i].length; j++) {
                 if (j === element.columnIndex) {
                     continue
@@ -122,7 +140,11 @@ export default class SimplexMatrix {
                 target[i][j] = normalize(source[i][j] - source[i][element.columnIndex!]
                     * target[element.rowIndex!][j])
             }
+            const resultCS = calculationsString.concat(' = ' + getCalculationsString(target[i], element))
+            content.push(resultCS)
         }
+
+        return content
     }
 
     findPossibleBearingColumns() : Array<MatrixElement> {
@@ -185,7 +207,7 @@ export default class SimplexMatrix {
 
     makeStep(
         bearingElement: MatrixElement
-    ) : SimplexMatrix {
+    ) {
         if (bearingElement.rowIndex === undefined || bearingElement.columnIndex === undefined) {
             throw new Error('Illegal state: row index or column index is undefined')
         }
@@ -209,10 +231,13 @@ export default class SimplexMatrix {
         SimplexMatrix.fullBearingColumn(
             this.coefficientsMatrix, coefficientMatrix, bearingElement
         )
-        SimplexMatrix.fullNonBearingRows(
+        const additionalContent = SimplexMatrix.fullNonBearingRows(
             this.coefficientsMatrix, coefficientMatrix, bearingElement
         )
 
-        return new SimplexMatrix(newRows, newColumns, coefficientMatrix)
+        return {
+            newMatrix : new SimplexMatrix(newRows, newColumns, coefficientMatrix),
+            calculations: additionalContent
+        }
     }
 }

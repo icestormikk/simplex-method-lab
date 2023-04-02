@@ -8,12 +8,14 @@ import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
 import {store} from "@/redux/store";
 import {addStep} from "@/redux/slices/SimplexState";
 import {copyTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
-import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
+import {EMPTY_MATRIX_ELEMENT, MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
+import * as Tags from "@/core/domain/math/enums/SimplexStepTag";
 
 export function appendSimplexStep(
     simplexMatrix: SimplexMatrix,
     bearingElement: MatrixElement,
-    possibleElements: Array<MatrixElement> = []
+    possibleElements: Array<MatrixElement> = [],
+    content?: { calculations?: Array<string>, tags?: Array<Tags.SimplexStepTag> }
 ) {
     if (bearingElement.rowIndex === undefined || bearingElement.columnIndex === undefined) {
         console.warn('Can\'t add a reference element with an undefined column or row index')
@@ -28,7 +30,11 @@ export function appendSimplexStep(
                 copyTwoDimensionalArray(simplexMatrix.coefficientsMatrix)
             ),
             bearingElement,
-            possibleBearingElements: possibleElements
+            possibleBearingElements: possibleElements,
+            additionalContent: {
+                calculations: content?.calculations || [],
+                tags: content?.tags || []
+            }
         })
     )
 }
@@ -99,11 +105,28 @@ export function passDefaultSimplexMethod(simplexMatrix: SimplexMatrix) {
                 throw new Error('Bearing element is undefined!')
             }
         } catch (e: any) {
+            appendSimplexStep(
+                simplexMatrix,
+                EMPTY_MATRIX_ELEMENT,
+                [],
+                {
+                    tags: [
+                        new Tags.HasErrorTag("Функция не ограничена снизу")
+                    ]
+                }
+            );
             throw new Error(`Cant find the bearing element: ${e.message}`)
         }
-        appendSimplexStep(simplexMatrix, bearingElements.element, bearingElements.possibleElements);
 
-        simplexMatrix = simplexMatrix.makeStep(bearingElements.element!)
+        const {newMatrix, calculations} = simplexMatrix.makeStep(bearingElements.element!)
+        appendSimplexStep(
+            simplexMatrix,
+            bearingElements.element,
+            bearingElements.possibleElements,
+            {calculations}
+        );
+
+        simplexMatrix = newMatrix;
     }
     return simplexMatrix;
 }

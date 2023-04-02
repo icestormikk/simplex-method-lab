@@ -13,11 +13,12 @@ function StepsList() {
                         key={index}
                         index={index}
                         stepInfo={{
-                            matrix: el.simplexSnapshot,
+                            simplexSnapshot: el.simplexSnapshot,
+                            possibleBearingElements: el.possibleBearingElements,
                             bearingElement: {
                                 multiplier: -1,
-                                rowIndex: el.bearingElement.row,
-                                columnIndex: el.bearingElement.column
+                                rowIndex: el.bearingElement.rowIndex,
+                                columnIndex: el.bearingElement.columnIndex
                             }
                         }}
                     />

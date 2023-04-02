@@ -103,20 +103,22 @@
         @apply
         w-full flex justify-start items-center gap-2 flex-col px-2
     }
-    .simplex-step {
+    .simplex-step-view {
         @apply
-        w-full h-max px-1 py-3 my-2 hover:bg-gray-300/60 relative flex
-        justify-start items-center gap-4 rounded-md border-gray-300
-        border-[1px]
+        flex flex-row gap-2
+    }
+    .simplex-step-view .change-element-block {
+        @apply
+        hidden
+    }
+    .simplex-step-view:hover .change-element-block {
+        @apply
+        flex
     }
     .simplex-step-number-block {
         @apply
         centered font-bold text-[1.2rem] text-white rounded-md p-2 bg-gray-500
         h-8 w-8
-    }
-    .simplex-step:hover .simplex-step-number-block {
-        @apply
-        bg-green-600
     }
     .fog-block {
         @apply
@@ -125,14 +127,6 @@
     .steps-container:hover {
         @apply
         bg-gray-100/80 duration-200 transition-all
-    }
-    .steps-container:hover .simplex-step:not(:hover) .fog-block {
-        @apply
-        flex
-    }
-    .steps-container .simplex-step {
-        @apply
-        bg-white/10
     }
     .menu-item {
         @apply
@@ -145,11 +139,11 @@
     }
     .simplex-matrix-table {
         @apply
-        w-max
+        w-max flex flex-row gap-2
     }
     .simplex-matrix-table td {
         @apply
-        h-10 w-16 max-h-[2.5rem] max-w-[4rem] border-[1px] border-gray-300 hover:bg-gray-300/50
+        h-10 w-16 max-h-[2.5rem] min-w-[4rem] border-[1px] border-gray-300 hover:bg-gray-300/50
         px-0.5 text-center font-bold
     }
     .simplex-matrix-table td.titled-cell {
@@ -177,6 +171,18 @@
         @apply
         m-1 p-2 rounded-xl border-[1px] border-gray-300 shadow-md w-full flex
         flex-col gap-2
+    }
+    .step-additional-content {
+        @apply
+        flex flex-col gap-1
+    }
+    .step-additional-content p {
+        @apply
+        text-xl
+    }
+    .step-additional-content li {
+        @apply
+        text-gray-500
     }
 }
 

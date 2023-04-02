@@ -7,6 +7,7 @@ import {artificialBasisMethod} from "@/core/algorithms/simplex/artificial";
 import SimplexMatrixTable from "@/interface/SimplexMatrixTable";
 import {clearSteps} from "@/redux/slices/SimplexState";
 import ColorViewer from "@/interface/Legend/ColorViewer";
+import AdditionalContentPanel from "@/interface/Basis/AdditionalContent/AdditionalContentPanel";
 
 function ArtificialBasisPanel() {
     const dispatch = useAppDispatch()
@@ -66,12 +67,36 @@ function ArtificialBasisPanel() {
                             </div>
                             {
                                 simplex.steps.map((step, index) => (
-                                    <SimplexMatrixTable
+                                    <div
                                         key={index}
-                                        matrix={step.simplexSnapshot}
-                                        selectedElement={step.bearingElement}
-                                        possibleBearingElements={step.possibleBearingElements}
-                                    />
+                                        className="simplex-step-view"
+                                    >
+                                        <SimplexMatrixTable
+                                            matrix={step.simplexSnapshot}
+                                            selectedElement={step.bearingElement}
+                                            possibleBearingElements={step.possibleBearingElements}
+                                        />
+                                        <div className="flex flex-col gap-1 text-sm font-bold">
+                                            {
+                                                step.additionalContent && (
+                                                    <AdditionalContentPanel
+                                                        content={step.additionalContent}
+                                                    />
+                                                )
+                                            }
+                                            {
+                                                step.possibleBearingElements.length > 0 && (
+                                                    <div className="change-element-block">
+                                                        <button
+                                                            type="button"
+                                                        >
+                                                            Change
+                                                        </button>
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+                                    </div>
                                 ))
                             }
                         </>
