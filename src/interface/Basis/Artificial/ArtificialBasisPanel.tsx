@@ -4,15 +4,13 @@ import {useAppDispatch, useAppSelector} from "@/redux/hooks";
 import {MdOutlineSettingsSuggest} from "react-icons/md";
 import MethodDescription from "@/interface/Basis/MethodDescription";
 import {artificialBasisMethod} from "@/core/algorithms/simplex/artificial";
-import SimplexMatrixTable from "@/interface/SimplexMatrixTable";
 import {clearSteps} from "@/redux/slices/SimplexState";
 import ColorViewer from "@/interface/Legend/ColorViewer";
-import AdditionalContentPanel from "@/interface/Basis/AdditionalContent/AdditionalContentPanel";
+import StepsList from "@/interface/StepsInfo/StepsList";
 
 function ArtificialBasisPanel() {
     const dispatch = useAppDispatch()
     const task = useAppSelector((state) => state.main)
-    const simplex = useAppSelector((state) => state.simplex)
     const [launched, setLaunched] = React.useState(false)
     const isSuitable = React.useMemo(
         () => {
@@ -24,11 +22,9 @@ function ArtificialBasisPanel() {
     const useMethod = () => {
         setLaunched(true)
         dispatch(clearSteps())
-        console.log(task.targetFunction.toString())
         artificialBasisMethod(
             task.targetFunction, task.constraints
         )
-        console.log(task.targetFunction.toString())
     }
 
     return (
@@ -65,40 +61,7 @@ function ArtificialBasisPanel() {
                                 <ColorViewer colorHex="#00C55E" legend="Лучший опорный элемент: "/>
                                 <ColorViewer colorHex="#bbf7d0" legend="Возможный опорный элемент: "/>
                             </div>
-                            {
-                                simplex.steps.map((step, index) => (
-                                    <div
-                                        key={index}
-                                        className="simplex-step-view"
-                                    >
-                                        <SimplexMatrixTable
-                                            matrix={step.simplexSnapshot}
-                                            selectedElement={step.bearingElement}
-                                            possibleBearingElements={step.possibleBearingElements}
-                                        />
-                                        <div className="flex flex-col gap-1 text-sm font-bold">
-                                            {
-                                                step.additionalContent && (
-                                                    <AdditionalContentPanel
-                                                        content={step.additionalContent}
-                                                    />
-                                                )
-                                            }
-                                            {
-                                                step.possibleBearingElements.length > 0 && (
-                                                    <div className="change-element-block">
-                                                        <button
-                                                            type="button"
-                                                        >
-                                                            Change
-                                                        </button>
-                                                    </div>
-                                                )
-                                            }
-                                        </div>
-                                    </div>
-                                ))
-                            }
+                            <StepsList/>
                         </>
                     )
                 }

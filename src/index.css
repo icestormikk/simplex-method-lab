@@ -101,11 +101,15 @@
     }
     .steps-container {
         @apply
-        w-full flex justify-start items-center gap-2 flex-col px-2
+        w-full flex justify-start items-start gap-2 flex-col px-2
     }
     .simplex-step-view {
         @apply
-        flex flex-row gap-2
+        flex lg:flex-row flex-col gap-2 w-full relative bordered rounded-md shadow-md
+    }
+    .change-element-block {
+        @apply
+        flex justify-end items-end flex-col
     }
     .simplex-step-view .change-element-block {
         @apply
@@ -119,10 +123,6 @@
         @apply
         centered font-bold text-[1.2rem] text-white rounded-md p-2 bg-gray-500
         h-8 w-8
-    }
-    .fog-block {
-        @apply
-        absolute top-0 left-0 h-full w-full bg-white/50 hidden
     }
     .steps-container:hover {
         @apply

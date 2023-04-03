@@ -31,6 +31,10 @@ export class HasResultTag extends SimplexStepTag {
 }
 export class HasErrorTag extends SimplexStepTag {
     constructor(reason?: string) {
-        super("Что-то пошло не так" + (reason ? `: ${reason}` : "..."));
+        super(
+            "Вычисления остановлены по " + (reason
+                ? `причине: ${reason}`
+                : "неизвестной причине")
+        );
     }
 }

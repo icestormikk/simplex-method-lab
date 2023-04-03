@@ -22,15 +22,27 @@ function ConstraintsMenu() {
     })
 
     const onSubmit = async () => {
+        function allElementsAreZero(source: Array<number>) {
+            for (let i = 0; i < source.length; i++) {
+                if (source[i] > 0) {
+                    return false
+                }
+            }
+
+            return true
+        }
+
         console.log(configuration)
+        const list = configuration.constraints
+            .filter((eq) =>
+                !allElementsAreZero(
+                    eq.polynomial.coefficients.map((el) => el.multiplier)
+                )
+            )
+        console.log(list)
         dispatch(updateTargetFunction(configuration.target))
         dispatch(
-            updateConstraintsList(
-                configuration.constraints
-                    .filter((eq) => eq.polynomial.coefficients.reduce((a,b) =>
-                        a + b.multiplier, 0
-                    ) !== 0)
-            )
+            updateConstraintsList(list)
         )
         dispatch(updateFractionViewMode(configuration.fractionView))
     }

@@ -187,7 +187,7 @@ export default class SimplexMatrix {
                     continue
                 }
                 const element = this.coefficientsMatrix[i][column.columnIndex]
-                if (element < 0) {
+                if (element <= 0) {
                     continue
                 }
 

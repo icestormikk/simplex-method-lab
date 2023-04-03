@@ -12,9 +12,12 @@ import {EMPTY_MATRIX_ELEMENT, MatrixElement} from "@/core/domain/math/aliases/Ma
 import * as Tags from "@/core/domain/math/enums/SimplexStepTag";
 
 export function appendSimplexStep(
+    isArtificialStep: boolean = false,
+    target: TargetFunction,
     simplexMatrix: SimplexMatrix,
     bearingElement: MatrixElement,
     possibleElements: Array<MatrixElement> = [],
+    appendedCoefficientIndexes?: Array<number>,
     content?: { calculations?: Array<string>, tags?: Array<Tags.SimplexStepTag> }
 ) {
     if (bearingElement.rowIndex === undefined || bearingElement.columnIndex === undefined) {
@@ -24,6 +27,10 @@ export function appendSimplexStep(
 
     store.dispatch(
         addStep({
+            id: store.getState().simplex.steps.length,
+            isArtificialBasisStep: isArtificialStep,
+            target: getCopyTargetFunction(target),
+            appendedCoefficientIndexes,
             simplexSnapshot: new SimplexMatrix(
                 [...simplexMatrix.rows],
                 [...simplexMatrix.columns],
@@ -62,27 +69,17 @@ export function simplexMethod(
     gauss(matrixConstraints, validatedSelectedColumns)
     const equations = Equation.fromMatrix(matrixConstraints)
 
-    console.log(targetFunction.toString())
     equations.forEach((eq, index) => {
         const column = validatedSelectedColumns[index];
-        console.log(eq.toString())
         const solved = eq.solveByCoefficient(column)
-
-        console.log(solved.toString())
         targetFunction.func.replaceCoefficientByIndex(column, solved)
     })
-    console.log(targetFunction.toString())
 
     let simplexMatrix = SimplexMatrix.fromMathObjects(
         targetFunction, equations, allColumnIndexes, selectedColumnIndexes
     )
 
-    simplexMatrix = passDefaultSimplexMethod(simplexMatrix);
-    appendSimplexStep(
-        simplexMatrix,
-        {columnIndex: -1, multiplier: -1, rowIndex: -1},
-        []
-    );
+    simplexMatrix = passDefaultSimplexMethod(copyTF, simplexMatrix);
 
     console.log(simplexMatrix)
     const coefficients = extractCoefficients(simplexMatrix)
@@ -93,22 +90,33 @@ export function simplexMethod(
     console.log(`f(x): ${result}`)
 }
 
-export function passDefaultSimplexMethod(simplexMatrix: SimplexMatrix) {
-    while (!isSolution(simplexMatrix)) {
+export function passDefaultSimplexMethod(
+    target: TargetFunction,
+    simplexMatrix: SimplexMatrix,
+    firstStepBearingElement?: { element: MatrixElement, possibleElements: Array<MatrixElement> }
+) {
+    for (;!isSolution(simplexMatrix);) {
         console.log(simplexMatrix)
         const cols = simplexMatrix.findPossibleBearingColumns()
         let bearingElements
 
         try {
-            bearingElements = simplexMatrix.findBearingElements(cols)
+            bearingElements = firstStepBearingElement || simplexMatrix.findBearingElements(cols)
+            if (firstStepBearingElement) {
+                firstStepBearingElement = undefined
+            }
+
             if (!bearingElements.element) {
                 throw new Error('Bearing element is undefined!')
             }
         } catch (e: any) {
             appendSimplexStep(
+                false,
+                target,
                 simplexMatrix,
                 EMPTY_MATRIX_ELEMENT,
                 [],
+                undefined,
                 {
                     tags: [
                         new Tags.HasErrorTag("Функция не ограничена снизу")
@@ -120,14 +128,27 @@ export function passDefaultSimplexMethod(simplexMatrix: SimplexMatrix) {
 
         const {newMatrix, calculations} = simplexMatrix.makeStep(bearingElements.element!)
         appendSimplexStep(
+            false,
+            target,
             simplexMatrix,
             bearingElements.element,
             bearingElements.possibleElements,
+            undefined,
             {calculations}
         );
 
         simplexMatrix = newMatrix;
     }
+
+    appendSimplexStep(
+        false,
+        target,
+        simplexMatrix,
+        EMPTY_MATRIX_ELEMENT,
+        [],
+        [],
+        {tags: [new Tags.HasResultTag()]}
+    )
     return simplexMatrix;
 }
 

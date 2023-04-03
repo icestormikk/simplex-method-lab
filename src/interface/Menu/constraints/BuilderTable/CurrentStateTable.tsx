@@ -22,11 +22,7 @@ function CurrentStateTable() {
                 <b>Ограничения:</b>
                 <b className="ml-4 text-gray-500 flex flex-col">
                     {
-                        constraints
-                            .filter((eq) => eq.polynomial.coefficients.reduce((a,b) =>
-                                a + b.multiplier, 0
-                            ) !== 0)
-                            .map((eq, index) => (
+                        constraints.map((eq, index) => (
                             <b key={index}>{eq.toString()}</b>
                         ))
                     }

@@ -11,16 +11,8 @@ function StepsList() {
                 steps.map((el, index) => (
                     <SimplexStep
                         key={index}
-                        index={index}
-                        stepInfo={{
-                            simplexSnapshot: el.simplexSnapshot,
-                            possibleBearingElements: el.possibleBearingElements,
-                            bearingElement: {
-                                multiplier: -1,
-                                rowIndex: el.bearingElement.rowIndex,
-                                columnIndex: el.bearingElement.columnIndex
-                            }
-                        }}
+                        stepInfo={el}
+                        stepIndex={index}
                     />
                 ))
             }

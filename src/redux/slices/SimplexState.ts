@@ -29,15 +29,18 @@ const simplexSlice = createSlice({
             state,
             action: PayloadAction<Array<SimplexStepInfo<AdditionalContentType>>>
         ) => {
-            state.steps = action.payload
+            state.steps.splice(0, state.steps.length, ...action.payload)
         },
         clearSteps: (state) => {
             state.steps.splice(0, state.steps.length)
+        },
+        removeStepsAfterIndex: (state, action: PayloadAction<number>) => {
+            state.steps.splice(action.payload, Number.MAX_VALUE)
         }
     }
 })
 
 export const simplexReducer = simplexSlice.reducer
 export const {
-    addStep, setSteps, clearSteps
+    addStep, setSteps, clearSteps, removeStepsAfterIndex
 } = simplexSlice.actions

@@ -13,28 +13,40 @@ import {
     getCopyTargetFunction,
     passDefaultSimplexMethod
 } from "@/core/algorithms/simplex";
-import {EMPTY_MATRIX_ELEMENT} from "@/core/domain/math/aliases/MatrixElement";
+import {EMPTY_MATRIX_ELEMENT, MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 import * as Tags from "@/core/domain/math/enums/SimplexStepTag";
 import {HasErrorTag} from "@/core/domain/math/enums/SimplexStepTag";
+import {store} from "@/redux/store";
 
-function passArtificialSimplexMethod(simplex: SimplexMatrix, additionalCoefficientIndexes: Array<number>) {
-    let counter = 0
-    while (!isArtificialSolution(simplex)) {
+export function passArtificialSimplexMethod(
+    target: TargetFunction,
+    simplex: SimplexMatrix,
+    additionalCoefficientIndexes: Array<number>,
+    firstStepBearingElement?: { element: MatrixElement, possibleElements: Array<MatrixElement> }
+) {
+    for (;!isArtificialSolution(simplex);) {
         const cols = simplex.findPossibleBearingColumns()
         let bearingElements;
 
         try {
-            bearingElements = simplex.findBearingElements(cols)
+            bearingElements = firstStepBearingElement || simplex.findBearingElements(cols)
+            if (firstStepBearingElement) {
+                firstStepBearingElement = undefined
+            }
+
             if (!bearingElements.element) {
                 throw new Error('Bearing element is undefined!')
             }
         } catch (e: any) {
             appendSimplexStep(
+                true,
+                target,
                 simplex,
                 EMPTY_MATRIX_ELEMENT,
-                undefined,
+                [],
+                additionalCoefficientIndexes,
                 {
-                    tags: [new HasErrorTag("Система несовместна.")]
+                    tags: [new HasErrorTag("Система условий противоречива.")]
                 }
             )
             throw new Error(`Cant find the bearing element: ${e.message}`)
@@ -42,20 +54,40 @@ function passArtificialSimplexMethod(simplex: SimplexMatrix, additionalCoefficie
 
         const {newMatrix, calculations} = simplex.makeStep(bearingElements.element)
         appendSimplexStep(
+            true,
+            target,
             simplex,
             bearingElements.element,
             bearingElements.possibleElements,
+            additionalCoefficientIndexes,
             {
                 calculations,
-                tags: (counter === 0) ? [new Tags.ArtificialSimplexStartTag()] : []
+                tags: (store.getState().simplex.steps.length === 0)
+                    ? [new Tags.ArtificialSimplexStartTag()]
+                    : []
             }
         )
         simplex = newMatrix
 
         deleteUnnecessaryColumnsFrom(simplex, additionalCoefficientIndexes)
-        counter++
     }
-    return simplex;
+
+    appendSimplexStep(
+        true,
+        target,
+        simplex,
+        EMPTY_MATRIX_ELEMENT,
+        [],
+        additionalCoefficientIndexes,
+        {tags: [
+                new Tags.ArtificialSimplexEndTag(), new Tags.DefaultSimplexStartTag()
+            ]}
+    )
+
+    const updatedSimplex = passToDefaultSimplex(target, simplex)
+    const resultSimplex = passDefaultSimplexMethod(target, updatedSimplex)
+
+    return resultSimplex;
 }
 
 export function artificialBasisMethod(
@@ -75,26 +107,13 @@ export function artificialBasisMethod(
     )
     fillSimplexMatrixLastRow(simplex.coefficientsMatrix)
 
-    simplex = passArtificialSimplexMethod(simplex, appendedCoefficients.map((el) => el.index))
-    appendSimplexStep(
+    simplex = passArtificialSimplexMethod(
+        copiedTargetFunction,
         simplex,
-        EMPTY_MATRIX_ELEMENT,
-        undefined,
-        {tags: [
-            new Tags.ArtificialSimplexEndTag(), new Tags.DefaultSimplexStartTag()
-        ]}
+        appendedCoefficients.map((el) => el.index)
     )
 
-    const updatedSimplex = passToDefaultSimplex(copiedTargetFunction, simplex)
-    const resultSimplex = passDefaultSimplexMethod(updatedSimplex)
-    appendSimplexStep(
-        resultSimplex,
-        EMPTY_MATRIX_ELEMENT,
-        undefined,
-        {tags: [new Tags.HasResultTag()]}
-    )
-
-    const coefficients = extractCoefficients(resultSimplex)
+    const coefficients = extractCoefficients(simplex)
     const result = target.func.getValueIn(...coefficients.map((el) => el.multiplier))
     console.log(
         'x: (' + coefficients.map((el) => `${el.multiplier}`).join(', ') + ')'

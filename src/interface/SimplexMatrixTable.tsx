@@ -6,10 +6,14 @@ import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 interface SimpleMatrixTableProps<T> {
     matrix: SimplexMatrix,
     selectedElement: MatrixElement,
-    possibleBearingElements: Array<MatrixElement>
+    possibleBearingElements: Array<MatrixElement>,
+    setPickedElement?: React.Dispatch<React.SetStateAction<MatrixElement>>
 }
 
-function SimplexMatrixTable({matrix, selectedElement, possibleBearingElements}: SimpleMatrixTableProps<number>) {
+function SimplexMatrixTable(
+    {matrix, selectedElement, possibleBearingElements, setPickedElement}: SimpleMatrixTableProps<number>
+) {
+
     const isPossibleElement = (row: number, column: number) => {
         const index = possibleBearingElements.findIndex((el) =>
             el.rowIndex === row && el.columnIndex === column
@@ -20,6 +24,12 @@ function SimplexMatrixTable({matrix, selectedElement, possibleBearingElements}: 
 
     const isSelectedElement = (row: number, column: number) => {
         return selectedElement.rowIndex === row && selectedElement.columnIndex === column
+    }
+
+    const handleElementClick = (elementValue: MatrixElement) => {
+        if (setPickedElement) {
+            setPickedElement(elementValue)
+        }
     }
 
     return (
@@ -55,7 +65,9 @@ function SimplexMatrixTable({matrix, selectedElement, possibleBearingElements}: 
                                             )
                                         }
                                         onClick={() => {
-                                            console.log(element)
+                                            handleElementClick({
+                                                rowIndex: index, columnIndex: elIndex, multiplier: element
+                                            })
                                         }}
                                     >
                                         {Rational.fromNumber(element).toString()}
