@@ -2,7 +2,8 @@ import React from 'react';
 import {useAppSelector} from "@/redux/hooks";
 
 function CurrentStateTable() {
-    const {targetFunction, constraints} = useAppSelector((state) => state.main)
+    const targetFunction = useAppSelector((state) => state.main.targetFunction)
+    const constraints = useAppSelector((state) => state.main.constraints)
 
     return (
         <div className="constraints-menu-panel">

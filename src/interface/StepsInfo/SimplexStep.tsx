@@ -1,12 +1,12 @@
 import React from 'react';
 import SimplexMatrixTable from "@/interface/SimplexMatrixTable";
-import {SimplexStepInfo} from "@/interface/types/SimplexStepInfo";
 import {AdditionalContentType, removeStepsAfterIndex} from "@/redux/slices/SimplexState";
 import AdditionalContentPanel from "@/interface/Basis/AdditionalContent/AdditionalContentPanel";
 import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 import {useAppDispatch, useAppSelector} from "@/redux/hooks";
 import {passArtificialSimplexMethod} from "@/core/algorithms/simplex/artificial";
 import {passDefaultSimplexMethod} from "@/core/algorithms/simplex";
+import {SimplexStepInfo} from "@/interface/domain/types/SimplexStepInfo";
 
 interface SimplexStepProps {
     stepInfo: SimplexStepInfo<AdditionalContentType>,

@@ -1,21 +1,17 @@
 import './index.css'
 import React from "react";
-import Polynomial from "@/core/domain/math/classes/Polynomial";
-import {Equation} from "@/core/domain/math/classes/Equation";
-import {TargetFunction} from "@/core/domain/math/classes/simplex/TargetFunction";
-import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
-import {useAppDispatch} from "@/redux/hooks";
-import {AiFillFile, AiOutlineQuestion, BiDownload, BiUpload, GiPerson} from "react-icons/all";
+import {AiFillFile, AiOutlineQuestion} from "react-icons/all";
+import {BiDownload, BiUpload} from "react-icons/bi"
+import {GiPerson} from "react-icons/gi";
 import TabPane from "@/interface/Tabpane/TabPane";
 import ConstraintsMenu from "@/interface/Menu/constraints/ConstraintsMenu";
-import {artificialBasisMethod} from "@/core/algorithms/simplex/artificial";
 import Menu from "@/interface/Menu/Menu";
-import {MenuItem} from "@/interface/types/MenuItem";
 import ArtificialBasisPanel from "@/interface/Basis/Artificial/ArtificialBasisPanel";
+import {MenuItem} from "@/interface/domain/types/MenuItem";
+import DefaultBasisPanel from "@/interface/Basis/Default/DefaultBasisPanel";
+import GraphicalMethodPanel from "@/interface/Graphics/GraphicalMethodPanel";
 
 function App() {
-    const dispatch = useAppDispatch()
-
     const items: Array<MenuItem> = [
         {
             title: 'Файл',
@@ -78,7 +74,7 @@ function App() {
                         isBlocked: false
                     },
                     content: (
-                        <h1>World</h1>
+                        <DefaultBasisPanel/>
                     )
                 },
                 {
@@ -86,12 +82,25 @@ function App() {
                         title: 'Метод искусственного базиса',
                         icon: undefined,
                         action: () => {
-                            console.log(12)
+                            console.log(2)
                         },
                         isBlocked: false
                     },
                     content: (
                         <ArtificialBasisPanel/>
+                    )
+                },
+                {
+                    tab: {
+                        title: 'Графический метод',
+                        icon: undefined,
+                        action: () => {
+                            console.log(3)
+                        },
+                        isBlocked: false
+                    },
+                    content: (
+                        <GraphicalMethodPanel/>
                     )
                 }
             ]
@@ -99,24 +108,10 @@ function App() {
         []
     )
 
-    const action = () => {
-        const tf1 = new TargetFunction(
-            Polynomial.fromNumbersArray([2, 1, -1, 3, -2]), ExtremumType.MINIMUM
-        )
-        const constraints = [
-            new Equation(Polynomial.fromNumbersArray([8, 2, 3, 5, 9]), 30),
-            new Equation(Polynomial.fromNumbersArray([5, 1, 2, 5, 6]), 19),
-            new Equation(Polynomial.fromNumbersArray([1, 1, 0, 3, 0]), 3),
-        ]
-
-        // simplexMethod(tf1, constraints, [0, 1, 2])
-        artificialBasisMethod(tf1, constraints)
-    }
-
     return (
         <div className="App">
             <Menu items={items}/>
-            <div className="mt-10 w-full">
+            <div className="mt-10 w-full h-full">
                 <TabPane tabs={tabs}/>
             </div>
         </div>

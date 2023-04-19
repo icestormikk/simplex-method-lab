@@ -51,6 +51,17 @@ const mainState = createSlice({
             if (fractionView) {
                 state.fractionViewMode = fractionView
             }
+        },
+        dropState: (state) => {
+            state.targetFunction = initialState.targetFunction
+            state.fractionViewMode = initialState.fractionViewMode
+            state.constraints.splice(
+                0,
+                state.constraints.length,
+                new Equation(
+                    Polynomial.fromNumbersArray([0]), 0
+                )
+            )
         }
     }
 })
@@ -59,5 +70,6 @@ export const mainStateReducer = mainState.reducer
 export const {
     updateTargetFunction,
     updateConstraintsList,
-    updateFractionViewMode
+    updateFractionViewMode,
+    dropState
 } = mainState.actions

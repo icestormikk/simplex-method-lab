@@ -1,45 +1,85 @@
 import React from 'react';
 import ConditionNotification from "@/interface/ConditionNotification";
 import {useAppDispatch, useAppSelector} from "@/redux/hooks";
+import StartBasisForm from "@/interface/Basis/Default/StartBasisForm";
 import {MdOutlineSettingsSuggest} from "react-icons/md";
 import MethodDescription from "@/interface/Basis/MethodDescription";
-import {artificialBasisMethod} from "@/core/algorithms/simplex/artificial";
-import {clearSteps} from "@/redux/slices/SimplexState";
 import ColorViewer from "@/interface/Legend/ColorViewer";
 import StepsList from "@/interface/StepsInfo/StepsList";
 import ResultPanel from "@/interface/Basis/ResultPanel";
+import {allElementsAreZero} from "@/core/algorithms/arrayhelper";
+import {clearSteps} from "@/redux/slices/SimplexState";
+import {simplexMethod} from "@/core/algorithms/simplex";
 
-function ArtificialBasisPanel() {
+function DefaultBasisPanel() {
     const dispatch = useAppDispatch()
     const task = useAppSelector((state) => state.main)
     const result = useAppSelector((state) => state.simplex.result)
+    const [basisCoefficients, setBasisCoefficients] = React.useState<Array<number>>(
+        task.targetFunction.func.coefficients.map(() => 0)
+    )
     const [launched, setLaunched] = React.useState(false)
-    const isSuitable = React.useMemo(
+    const isTargetNotEmpty = React.useMemo(
         () => {
             return !task.targetFunction.isEmpty()
         },
         [task.targetFunction]
     )
+    const isStartBasisInitialized = React.useMemo(
+        () => {
+            return !allElementsAreZero(basisCoefficients)
+        },
+        [basisCoefficients]
+    )
+    const isSuitable = React.useMemo(
+        () => {
+            return isStartBasisInitialized && isTargetNotEmpty
+        },
+        [isStartBasisInitialized, isTargetNotEmpty]
+    )
 
     const useMethod = () => {
+        const selectedColumnIndexes: Array<number> = []
+        basisCoefficients.forEach((el, index) => {
+            if (el > 0) {
+                selectedColumnIndexes.push(index)
+            }
+        })
+
         setLaunched(true)
         dispatch(clearSteps())
-        artificialBasisMethod(
-            task.targetFunction, task.constraints
+        simplexMethod(
+            task.targetFunction,
+            task.constraints,
+            selectedColumnIndexes
         )
     }
 
     return (
         <div className="flex flex-col w-full p-2 gap-4">
-            <ConditionNotification
-                condition={isSuitable}
-                successText="Условие выполнено"
-                failureText="Необходимо определить условия задачи"
-            />
+            <div className="flex gap-2">
+                <ConditionNotification
+                    condition={isTargetNotEmpty}
+                    successText="Условие выполнено"
+                    failureText="Необходимо определить условия задачи"
+                />
+                <ConditionNotification
+                    condition={isStartBasisInitialized}
+                    successText="Условие выполнено"
+                    failureText="Определите базис"
+                />
+            </div>
+            <div className="w-full bordered rounded-md shadow-md p-1">
+                <b>Начальный базис:</b>
+                <StartBasisForm
+                    basisCoefficients={basisCoefficients}
+                    setBasisCoefficients={setBasisCoefficients}
+                />
+            </div>
             <button
                 type="button"
                 className={"w-max bordered px-2 py-1 rounded text-[#efefef] centered gap-2 " +
-                (isSuitable ? 'bg-green-600' : 'bg-red-700')}
+                    (isSuitable ? 'bg-green-600' : 'bg-red-700')}
                 disabled={!isSuitable}
                 title={!isSuitable ? "Применение метода в данный момент невозможно" : ""}
                 onClick={() => useMethod()}
@@ -77,4 +117,4 @@ function ArtificialBasisPanel() {
     );
 }
 
-export default ArtificialBasisPanel;
+export default DefaultBasisPanel;

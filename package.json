@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.3",
+    "jsxgraph": "^1.5.0",
     "jsxgraph-react-js": "^1.0.4",
     "react-redux": "^8.0.5"
   }

@@ -3,10 +3,9 @@ import {Equation} from "@/core/domain/math/classes/Equation";
 import gauss from "@/core/algorithms/gauss";
 import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
 import Coefficient from "@/core/domain/math/classes/Coefficient";
-import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
 import {store} from "@/redux/store";
-import {addStep} from "@/redux/slices/SimplexState";
+import {addStep, setResult} from "@/redux/slices/SimplexState";
 import {copyTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
 import {EMPTY_MATRIX_ELEMENT, MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 import * as Tags from "@/core/domain/math/enums/SimplexStepTag";
@@ -29,7 +28,7 @@ export function appendSimplexStep(
         addStep({
             id: store.getState().simplex.steps.length,
             isArtificialBasisStep: isArtificialStep,
-            target: getCopyTargetFunction(target),
+            target: target.copy(),
             appendedCoefficientIndexes,
             simplexSnapshot: new SimplexMatrix(
                 [...simplexMatrix.rows],
@@ -56,38 +55,50 @@ export function simplexMethod(
     }
 
     const allColumnIndexes = [...Array(targetFunction.func.coefficients.length).keys()]
-    const copyTF = getCopyTargetFunction(targetFunction)
+    const copyTF = targetFunction.copy()
 
     let validatedSelectedColumns: Array<number>
     try {
         validatedSelectedColumns = validateColumnsArray(selectedColumnIndexes, allColumnIndexes)
     } catch (e: any) {
+        store.dispatch(
+            setResult(undefined)
+        )
         throw new Error(`Error while validating of columns: ${e.message}`)
     }
 
     const matrixConstraints = Equation.toMatrix(constraints)
-    gauss(matrixConstraints, validatedSelectedColumns)
+    try {
+        gauss(matrixConstraints, validatedSelectedColumns)
+    } catch (e: any) {
+        store.dispatch(
+            setResult(undefined)
+        )
+        appendSimplexStep(false,
+            copyTF,
+            new SimplexMatrix([],[], []),
+            EMPTY_MATRIX_ELEMENT,
+            undefined,
+            undefined,
+            {
+                tags: [new Tags.HasErrorTag("Ошибка при определении базиса")]
+            }
+        )
+        throw new Error(e.message)
+    }
     const equations = Equation.fromMatrix(matrixConstraints)
 
     equations.forEach((eq, index) => {
         const column = validatedSelectedColumns[index];
         const solved = eq.solveByCoefficient(column)
-        targetFunction.func.replaceCoefficientByIndex(column, solved)
+        copyTF.func.replaceCoefficientByIndex(column, solved)
     })
 
     let simplexMatrix = SimplexMatrix.fromMathObjects(
         targetFunction, equations, allColumnIndexes, selectedColumnIndexes
     )
 
-    simplexMatrix = passDefaultSimplexMethod(copyTF, simplexMatrix);
-
-    console.log(simplexMatrix)
-    const coefficients = extractCoefficients(simplexMatrix)
-    const result = copyTF.func.getValueIn(...coefficients.map((el) => el.multiplier))
-    console.log(
-        'x: (' + coefficients.map((el) => `${el.multiplier}`).join(', ') + ')'
-    )
-    console.log(`f(x): ${result}`)
+    passDefaultSimplexMethod(copyTF, simplexMatrix);
 }
 
 export function passDefaultSimplexMethod(
@@ -96,7 +107,6 @@ export function passDefaultSimplexMethod(
     firstStepBearingElement?: { element: MatrixElement, possibleElements: Array<MatrixElement> }
 ) {
     for (;!isSolution(simplexMatrix);) {
-        console.log(simplexMatrix)
         const cols = simplexMatrix.findPossibleBearingColumns()
         let bearingElements
 
@@ -107,9 +117,13 @@ export function passDefaultSimplexMethod(
             }
 
             if (!bearingElements.element) {
+                // noinspection ExceptionCaughtLocallyJS
                 throw new Error('Bearing element is undefined!')
             }
         } catch (e: any) {
+            store.dispatch(
+                setResult(undefined)
+            )
             appendSimplexStep(
                 false,
                 target,
@@ -136,7 +150,6 @@ export function passDefaultSimplexMethod(
             undefined,
             {calculations}
         );
-
         simplexMatrix = newMatrix;
     }
 
@@ -149,20 +162,8 @@ export function passDefaultSimplexMethod(
         [],
         {tags: [new Tags.HasResultTag()]}
     )
+    extractResult(simplexMatrix)
     return simplexMatrix;
-}
-
-function isSolution(simplexMatrix: SimplexMatrix) : boolean {
-    const lastRowIndex = simplexMatrix.coefficientsMatrix.length - 1
-
-    for (let i = 0; i < simplexMatrix.coefficientsMatrix[lastRowIndex].length - 1; i++) {
-        const element = simplexMatrix.coefficientsMatrix[lastRowIndex][i]
-        if (element < 0) {
-            return false
-        }
-    }
-
-    return true
 }
 
 export function extractCoefficients(simplexMatrix: SimplexMatrix) : Array<Coefficient> {
@@ -179,13 +180,22 @@ export function extractCoefficients(simplexMatrix: SimplexMatrix) : Array<Coeffi
     )
 }
 
-export function getCopyTargetFunction(source: TargetFunction) : TargetFunction {
-    const {func, extremumType} = source
-    const {coefficients, constant} = func
-    const newCoefficients = coefficients.map((el) => new Coefficient(el.multiplier, el.index))
-    const newPolynomial = new Polynomial([...newCoefficients], constant)
+export function extractResult(simplexMatrix: SimplexMatrix) {
+    const coefficients = extractCoefficients(simplexMatrix)
+    store.dispatch(setResult(coefficients))
+}
 
-    return new TargetFunction(newPolynomial, extremumType)
+function isSolution(simplexMatrix: SimplexMatrix) : boolean {
+    const lastRowIndex = simplexMatrix.coefficientsMatrix.length - 1
+
+    for (let i = 0; i < simplexMatrix.coefficientsMatrix[lastRowIndex].length - 1; i++) {
+        const element = simplexMatrix.coefficientsMatrix[lastRowIndex][i]
+        if (element < 0) {
+            return false
+        }
+    }
+
+    return true
 }
 
 function validateColumnsArray(array: Array<number>, allIndexesArray: Array<number>) {

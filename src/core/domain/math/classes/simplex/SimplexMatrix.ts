@@ -6,7 +6,6 @@ import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 import {ROUNDING_ACCURACY} from "@/core/constants";
 import {normalize} from "@/core/algorithms/numberhelper";
 import {Rational} from "@/core/domain/math/classes/Rational";
-
 function getCalculationsString(source: Array<number>, bearingElement: MatrixElement) {
     return '(' + source.map((el, elIndex) =>
         elIndex === bearingElement.columnIndex ? '*' : `${Rational.fromNumber(el)}`
@@ -148,18 +147,6 @@ export default class SimplexMatrix {
     }
 
     findPossibleBearingColumns() : Array<MatrixElement> {
-        // function findAbsoluteMaximum(source: Array<MatrixElement>) : MatrixElement {
-        //     let max = source[0]
-        //     source.forEach((element) => {
-        //         const value = Math.abs(element.multiplier);
-        //         if (value > Math.abs(max.multiplier)) {
-        //             max = element
-        //         }
-        //     })
-        //
-        //     return max
-        // }
-
         const result: Array<MatrixElement> = []
         const lastRowIndex = this.coefficientsMatrix.length - 1
 
@@ -176,10 +163,24 @@ export default class SimplexMatrix {
     findBearingElements(
         possibleBearingColumns: Array<MatrixElement>
     ) : {element: MatrixElement | undefined, possibleElements: Array<MatrixElement>} {
+        function findAbsoluteMaximum(source: Array<MatrixElement>) : MatrixElement {
+            let max = source[0]
+            source.forEach((element) => {
+                const value = Math.abs(element.multiplier);
+                if (value > Math.abs(max.multiplier)) {
+                    max = element
+                }
+            })
+
+            return max
+        }
+
         this.isSafe(possibleBearingColumns)
         const possibleElements: Array<MatrixElement> = []
+        const maxElementColumnIndex = findAbsoluteMaximum(possibleBearingColumns).columnIndex
         let min: MatrixElement | undefined
         let minDiv = Number.MAX_VALUE
+
 
         for (const column of possibleBearingColumns) {
             for (let i = 0; i < this.coefficientsMatrix.length; i++) {
@@ -195,7 +196,7 @@ export default class SimplexMatrix {
                 const elementAsObject = {multiplier: element, rowIndex: i, columnIndex: column.columnIndex}
 
                 possibleElements.push(elementAsObject)
-                if (min === undefined || div < minDiv) {
+                if ((min === undefined || div < minDiv) && elementAsObject.columnIndex == maxElementColumnIndex) {
                     minDiv = div
                     min = elementAsObject
                 }

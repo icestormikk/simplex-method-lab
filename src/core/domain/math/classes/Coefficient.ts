@@ -1,3 +1,5 @@
+import {Rational} from "@/core/domain/math/classes/Rational";
+
 export default class Coefficient {
     constructor(
         public multiplier: number,
@@ -5,6 +7,6 @@ export default class Coefficient {
     ) {}
 
     public toString() : string {
-        return `${this.multiplier}${this.index !== undefined ? `*x${this.index}` : ''}`
+        return `${Rational.fromNumber(this.multiplier)}${this.index !== undefined ? `*x${this.index}` : ''}`
     }
 }

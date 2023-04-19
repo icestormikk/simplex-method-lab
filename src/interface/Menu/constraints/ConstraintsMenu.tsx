@@ -6,45 +6,64 @@ import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
 import {FractionView} from "@/core/domain/math/enums/FractionView";
 import {useAppDispatch, useAppSelector} from "@/redux/hooks";
 import {
+    dropState,
     updateConstraintsList,
     updateFractionViewMode,
     updateTargetFunction
 } from "@/redux/slices/MainState";
 import CurrentTargetFunctionBlock from "@/interface/Menu/constraints/BuilderTable/CurrentStateTable";
+import ModalWindow from "@/interface/Modal/ModalWindow";
+import UploadModalContent from "@/interface/Menu/constraints/UploadModalContent";
+import {allElementsAreZero} from "@/core/algorithms/arrayhelper";
+import {Equation} from "@/core/domain/math/classes/Equation";
+import Polynomial from "@/core/domain/math/classes/Polynomial";
+import Coefficient from "@/core/domain/math/classes/Coefficient";
 
 function ConstraintsMenu() {
     const dispatch = useAppDispatch()
-    const {targetFunction, constraints, fractionViewMode} = useAppSelector((state) => state.main)
+    const [isUploadModalOpen, setIsUploadModalOpen] = React.useState(false)
+    const targetFunction = useAppSelector((state) => state.main.targetFunction)
+    const constraints = useAppSelector((state) => state.main.constraints)
+    const fractionViewMode = useAppSelector((state) => state.main.fractionViewMode)
     const [configuration, setConfiguration] = React.useState({
-        target: targetFunction,
-        constraints: [...constraints],
+        target: targetFunction.copy(),
+        constraints: constraints.map((eq) => eq.copy()),
         fractionView: fractionViewMode
     })
 
     const onSubmit = async () => {
-        function allElementsAreZero(source: Array<number>) {
-            for (let i = 0; i < source.length; i++) {
-                if (source[i] > 0) {
-                    return false
-                }
-            }
-
-            return true
-        }
-
-        console.log(configuration)
-        const list = configuration.constraints
-            .filter((eq) =>
-                !allElementsAreZero(
-                    eq.polynomial.coefficients.map((el) => el.multiplier)
-                )
-            )
-        console.log(list)
         dispatch(updateTargetFunction(configuration.target))
         dispatch(
-            updateConstraintsList(list)
+            updateConstraintsList(
+                configuration.constraints
+                    .filter((eq) =>
+                        !allElementsAreZero(
+                            eq.polynomial.coefficients.map((el) => el.multiplier)
+                        )
+                    )
+            )
         )
         dispatch(updateFractionViewMode(configuration.fractionView))
+    }
+
+    const onReset = () => {
+        dispatch(dropState())
+        setConfiguration((prevState) => {
+            prevState.target.func.coefficients.splice(
+                0,
+                prevState.target.func.coefficients.length,
+                new Coefficient(0, 0)
+            )
+            prevState.constraints.splice(
+                0,
+                prevState.constraints.length,
+                new Equation(
+                    Polynomial.fromNumbersArray([0]), 0
+                )
+            )
+
+            return prevState
+        })
     }
 
     return (
@@ -52,6 +71,12 @@ function ConstraintsMenu() {
             <CurrentTargetFunctionBlock/>
             <div className="constraints-menu-panel">
                 <b>Коэффициенты целевой функции и ограничений:</b>
+                <button
+                    type="button"
+                    onClick={() => setIsUploadModalOpen(true)}
+                >
+                    Open
+                </button>
                 <CoefficientsBuilderTable
                     configuration={{
                         target: configuration.target,
@@ -69,12 +94,11 @@ function ConstraintsMenu() {
                             const value: string = mode.target.value
                             setConfiguration((prevState) => {
                                 if (value === ExtremumType.MAXIMUM) {
-                                    prevState.target.extremumType = ExtremumType.MAXIMUM
+                                    configuration.target.extremumType = ExtremumType.MAXIMUM
                                 }
                                 else {
-                                    prevState.target.extremumType = ExtremumType.MINIMUM
+                                    configuration.target.extremumType = ExtremumType.MINIMUM
                                 }
-
                                 return prevState
                             })
                         }}
@@ -90,11 +114,11 @@ function ConstraintsMenu() {
                         name="fraction_view"
                         id="fraction_view"
                         onChange={(view) => {
+                            const value = FractionView[
+                                view.target.value as keyof typeof FractionView
+                            ]
                             setConfiguration((prevState) => {
-                                prevState.fractionView = FractionView[
-                                    view.target.value as keyof typeof FractionView
-                                ]
-
+                                prevState.fractionView = value
                                 return prevState
                             })
                         }}
@@ -121,11 +145,20 @@ function ConstraintsMenu() {
                     type="button"
                     className="centered gap-2 bg-gray-500/80 rounded-md px-2 py-0.5 text-white
                     text-base"
+                    onClick={() => onReset()}
                 >
                     <RxReset/>
                     <span>Сбросить</span>
                 </button>
             </div>
+            <ModalWindow
+                isOpen={isUploadModalOpen}
+                setIsOpen={setIsUploadModalOpen}
+                title="Загрузить из файла"
+                content={(
+                    <UploadModalContent/>
+                )}
+            />
         </div>
     );
 }

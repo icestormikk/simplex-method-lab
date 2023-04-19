@@ -65,7 +65,7 @@ function validateInput(
     selectedColumns: Array<number>,
     sourceMatrix: Matrix<number>
 ) {
-    selectedColumns.splice(
+    selectedColumns = selectedColumns.splice(
         0, selectedColumns.length, ...new Set(selectedColumns)
     )
     selectedColumns.forEach((el, index) => {
@@ -75,6 +75,7 @@ function validateInput(
     })
 
     if (selectedColumns.length !== sourceMatrix.length) {
+        console.log(selectedColumns, sourceMatrix)
         throw new Error('Count of selected columns !== source matrix size')
     }
 }

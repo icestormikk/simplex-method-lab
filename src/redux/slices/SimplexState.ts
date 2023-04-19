@@ -1,6 +1,7 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {SimplexStepInfo} from "@/interface/types/SimplexStepInfo";
 import {SimplexStepTag} from "@/core/domain/math/enums/SimplexStepTag";
+import {SimplexStepInfo} from "@/interface/domain/types/SimplexStepInfo";
+import Coefficient from "@/core/domain/math/classes/Coefficient";
 
 export type AdditionalContentType = {
     calculations: Array<string>,
@@ -9,10 +10,12 @@ export type AdditionalContentType = {
 
 interface SimplexState {
     steps: Array<SimplexStepInfo<AdditionalContentType>>
+    result?: Array<number>
 }
 
 const initialState: SimplexState = {
-    steps: []
+    steps: [],
+    result: undefined
 }
 
 const simplexSlice = createSlice({
@@ -36,11 +39,18 @@ const simplexSlice = createSlice({
         },
         removeStepsAfterIndex: (state, action: PayloadAction<number>) => {
             state.steps.splice(action.payload, Number.MAX_VALUE)
+        },
+        setResult: (
+            state,
+            action: PayloadAction<Array<Coefficient> | undefined>
+        ) => {
+            state.result = action.payload?.map((el) => el.multiplier)
         }
     }
 })
 
 export const simplexReducer = simplexSlice.reducer
 export const {
-    addStep, setSteps, clearSteps, removeStepsAfterIndex
+    addStep, setSteps, clearSteps, removeStepsAfterIndex,
+    setResult
 } = simplexSlice.actions

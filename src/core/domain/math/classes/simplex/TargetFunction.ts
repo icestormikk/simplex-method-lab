@@ -1,5 +1,6 @@
 import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
+import Coefficient from "@/core/domain/math/classes/Coefficient";
 
 export class TargetFunction {
     constructor(
@@ -31,6 +32,15 @@ export class TargetFunction {
         }
 
         return result;
+    }
+
+    copy() : TargetFunction {
+        const {func, extremumType} = this
+        const {coefficients, constant} = func
+        const newCoefficients = coefficients.map((el) => new Coefficient(el.multiplier, el.index))
+        const newPolynomial = new Polynomial([...newCoefficients], constant)
+
+        return new TargetFunction(newPolynomial, extremumType)
     }
 
     public toString() : string {

@@ -1,5 +1,6 @@
 import Coefficient from "./Coefficient";
 import {coefficientValidator} from "@/core/validators/coefficientIndexValidator";
+import {Rational} from "@/core/domain/math/classes/Rational";
 
 // const coefficientsRegex = /(-*\d*[.,]*\d+\*x\d+)|(-*\d+)/ig;
 // const numbersRegex = /(-*\d*[.,]*\d+)|(-*\d+)/ig;
@@ -52,6 +53,7 @@ export default class Polynomial {
     }
 
     replaceCoefficientByIndex(index: number, replacement: Polynomial) {
+        const copiedReplacement = replacement.copy()
         const suitableCoefficientIndex = this.coefficients_.findIndex((el) =>
             el.index === index
         )
@@ -60,58 +62,18 @@ export default class Polynomial {
             throw new Error(`Index of replacing coefficient does not exist in this polynomial: ${index}, ${replacement.toString()}`)
         }
 
-        replacement.coefficients.forEach((coefficient) =>
+        copiedReplacement.coefficients.forEach((coefficient) =>
             coefficient.multiplier *= this.coefficients[suitableCoefficientIndex].multiplier
         )
-        replacement.constant *= this.coefficients[suitableCoefficientIndex].multiplier
+        copiedReplacement.constant *= this.coefficients[suitableCoefficientIndex].multiplier
 
         this.coefficients_.splice(suitableCoefficientIndex, 1)
-        this.add(replacement)
+        this.add(copiedReplacement)
     }
-
-    // static fromString(
-    //     context: string
-    // ) : Polynomial {
-    //     const coefficientsIterator = context.matchAll(coefficientsRegex);
-    //
-    //     Array.from(coefficientsIterator).forEach((el) => {
-    //         const coefAndIndex = el[0].match(numbersRegex)?.map((numb) =>
-    //             Number(numb.replace(/,/ig, "."))
-    //         )
-    //         if (!coefAndIndex) {
-    //             return
-    //         }
-    //
-    //         const coefficientIndex = this.coefficients.findIndex((c) =>
-    //             c.index == coefAndIndex[1]
-    //         )
-    //
-    //         if (coefficientIndex > -1) {
-    //             this.coefficients[coefficientIndex].multiplier += coefAndIndex[0]
-    //         } else {
-    //             if (coefAndIndex.length === 1 || coefAndIndex[1] === -1) {
-    //                 this.constant = coefAndIndex[0]
-    //             } else {
-    //                 this.coefficients.push(new Coefficient(coefAndIndex[0], coefAndIndex[1]))
-    //             }
-    //         }
-    //     })
-    // }
 
     private getStyledConstant(isReversed = false) : string {
         const updatedConstant = (isReversed ? (-1) : 1) * this.constant
-        return updatedConstant !== 0 ? ((updatedConstant > 0 ? "+" : "") + updatedConstant) : ''
-    }
-
-    private deleteZeroCoefficients() {
-        const result: Array<Coefficient> = []
-        this.coefficients_.forEach((el) => {
-            if (el.multiplier !== 0) {
-                result.push(el)
-            }
-        })
-
-        this.coefficients_ = result
+        return updatedConstant !== 0 ? ((updatedConstant > 0 ? "+" : "") + Rational.fromNumber(updatedConstant)) : ''
     }
 
     solveByCoefficient(index: number) : Polynomial {
@@ -154,7 +116,16 @@ export default class Polynomial {
             result += multiplier * this.coefficients[index].multiplier
         })
 
-        return result
+        return result + this.constant
+    }
+
+    public copy() : Polynomial {
+        return new Polynomial(
+            this.coefficients.map((el) =>
+                new Coefficient(el.multiplier, el.index)
+            ),
+            this.constant
+        )
     }
 
     public toString() : string {

@@ -80,6 +80,10 @@
         @apply
         flex md:flex-row flex-col
     }
+    form input {
+        @apply
+        bordered rounded-sm
+    }
 }
 
 @layer components {
@@ -183,6 +187,14 @@
     .step-additional-content li {
         @apply
         text-gray-500
+    }
+    .graphical-elements-info-block {
+        @apply
+        flex flex-col gap-2
+    }
+    .graphical-elements-info-block span {
+        @apply
+        text-right
     }
 }
 

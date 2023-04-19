@@ -32,3 +32,24 @@ export function deleteColumnByIndex<T>(source: Matrix<T>, index: number) {
         source[i].splice(index, 1)
     }
 }
+
+export function getLongestLineInMatrix<T>(source: Matrix<T>) : Array<T> {
+    let result = [...source[0]]
+    for (const line of source) {
+        if (line.length > result.length) {
+            result = [...line]
+        }
+    }
+
+    return result
+}
+
+export function allElementsAreZero(source: Array<number>) {
+    for (let i = 0; i < source.length; i++) {
+        if (source[i] !== 0) {
+            return false
+        }
+    }
+
+    return true
+}

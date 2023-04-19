@@ -2,6 +2,7 @@ import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {Matrix} from "@/core/domain/math/aliases/Matrix";
 import {coefficientValidator} from "@/core/validators/coefficientIndexValidator";
 import {buildTwoDimensionalArray} from "@/core/algorithms/arrayhelper";
+import Coefficient from "@/core/domain/math/classes/Coefficient";
 
 export class Equation {
     constructor(
@@ -48,6 +49,17 @@ export class Equation {
 
         return new Polynomial(this.polynomial.coefficients, this.polynomial.constant - this.value)
             .solveByCoefficient(index)
+    }
+
+    copy() : Equation {
+        const copiedCoefficients = this.polynomial.coefficients.map((coefficient) =>
+            new Coefficient(coefficient.multiplier, coefficient.index)
+        )
+
+        return new Equation(
+            new Polynomial(copiedCoefficients, this.polynomial.constant),
+            this.value
+        )
     }
 
     public toString() : string {

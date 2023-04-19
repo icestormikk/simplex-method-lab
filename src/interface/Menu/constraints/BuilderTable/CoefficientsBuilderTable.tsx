@@ -38,10 +38,7 @@ function CoefficientsBuilderTable({configuration}: CoefficientBuilderTableProps)
             prevState.func.coefficients.push(
                 new Coefficient(0, prevState.func.coefficients.length)
             )
-
-            return new TargetFunction(
-                prevState.func, prevState.extremumType
-            )
+            return prevState
         })
         setConstraintsMatrix((prevState) => {
             prevState.forEach((eq) => {
@@ -104,7 +101,7 @@ function CoefficientsBuilderTable({configuration}: CoefficientBuilderTableProps)
     }
 
     function onChangeTargetCoefficient(value: number, coefficient: Coefficient | number) {
-        if (value) {
+        if (value !== undefined) {
             if (coefficient instanceof Coefficient) {
                 coefficient.multiplier = value
             } else {
@@ -115,13 +112,14 @@ function CoefficientsBuilderTable({configuration}: CoefficientBuilderTableProps)
     }
 
     function onChangeConstraintsCoefficient(value: number, element: Coefficient | number, index: number) {
-        if (value) {
+        if (value !== undefined) {
             if (element instanceof Coefficient) {
                 element.multiplier = value
             } else {
                 constraintsMatrix[index].value = value
             }
         }
+        return element
     }
 
     return (
@@ -185,7 +183,7 @@ function CoefficientsBuilderTable({configuration}: CoefficientBuilderTableProps)
                                                     }
                                                     onChange={(event) => {
                                                         const value = Number(event.target.value)
-                                                        onChangeConstraintsCoefficient(value, element, index);
+                                                        element = onChangeConstraintsCoefficient(value, element, index);
                                                     }}
                                                 />
                                             </td>

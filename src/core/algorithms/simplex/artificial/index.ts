@@ -7,16 +7,12 @@ import {Matrix} from "@/core/domain/math/aliases/Matrix";
 import {deleteColumnByIndex} from "@/core/algorithms/arrayhelper";
 import {Rational} from "@/core/domain/math/classes/Rational";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
-import {
-    appendSimplexStep,
-    extractCoefficients,
-    getCopyTargetFunction,
-    passDefaultSimplexMethod
-} from "@/core/algorithms/simplex";
+import {appendSimplexStep, passDefaultSimplexMethod} from "@/core/algorithms/simplex";
 import {EMPTY_MATRIX_ELEMENT, MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
 import * as Tags from "@/core/domain/math/enums/SimplexStepTag";
 import {HasErrorTag} from "@/core/domain/math/enums/SimplexStepTag";
 import {store} from "@/redux/store";
+import {setResult} from "@/redux/slices/SimplexState";
 
 export function passArtificialSimplexMethod(
     target: TargetFunction,
@@ -35,6 +31,7 @@ export function passArtificialSimplexMethod(
             }
 
             if (!bearingElements.element) {
+                // noinspection ExceptionCaughtLocallyJS
                 throw new Error('Bearing element is undefined!')
             }
         } catch (e: any) {
@@ -49,6 +46,7 @@ export function passArtificialSimplexMethod(
                     tags: [new HasErrorTag("Система условий противоречива.")]
                 }
             )
+            store.dispatch(setResult(undefined))
             throw new Error(`Cant find the bearing element: ${e.message}`)
         }
 
@@ -85,16 +83,14 @@ export function passArtificialSimplexMethod(
     )
 
     const updatedSimplex = passToDefaultSimplex(target, simplex)
-    const resultSimplex = passDefaultSimplexMethod(target, updatedSimplex)
-
-    return resultSimplex;
+    return passDefaultSimplexMethod(target, updatedSimplex);
 }
 
 export function artificialBasisMethod(
     target: TargetFunction,
     constraints: Array<Equation>
 ) {
-    const copiedTargetFunction = getCopyTargetFunction(target)
+    const copiedTargetFunction = target.copy()
     const copiedConstraints = copyConstraints(constraints)
 
     validateArguments(copiedTargetFunction, copiedConstraints)
@@ -107,18 +103,11 @@ export function artificialBasisMethod(
     )
     fillSimplexMatrixLastRow(simplex.coefficientsMatrix)
 
-    simplex = passArtificialSimplexMethod(
+    passArtificialSimplexMethod(
         copiedTargetFunction,
         simplex,
         appendedCoefficients.map((el) => el.index)
     )
-
-    const coefficients = extractCoefficients(simplex)
-    const result = target.func.getValueIn(...coefficients.map((el) => el.multiplier))
-    console.log(
-        'x: (' + coefficients.map((el) => `${el.multiplier}`).join(', ') + ')'
-    )
-    console.log(`f(x): ${result}`)
 }
 
 function validateArguments(
@@ -139,15 +128,10 @@ function validateArguments(
     }
 }
 
-function copyConstraints(source: Array<Equation>) : Array<Equation> {
+export function copyConstraints(source: Array<Equation>) : Array<Equation> {
     const result: Array<Equation> = []
     for (const equation of source) {
-        result.push(
-            new Equation(
-                new Polynomial([...equation.polynomial.coefficients], equation.polynomial.constant),
-                equation.value
-            )
-        )
+        result.push(equation.copy())
     }
     return result
 }
