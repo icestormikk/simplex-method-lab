@@ -45,7 +45,7 @@ export function appendSimplexStep(
     )
 }
 
-export function simplexMethod(
+export async function simplexMethod(
     targetFunction: TargetFunction,
     constraints: Array<Equation>,
     selectedColumnIndexes: Array<number>,
@@ -98,10 +98,10 @@ export function simplexMethod(
         targetFunction, equations, allColumnIndexes, selectedColumnIndexes
     )
 
-    passDefaultSimplexMethod(copyTF, simplexMatrix);
+    await passDefaultSimplexMethod(copyTF, simplexMatrix);
 }
 
-export function passDefaultSimplexMethod(
+export async function passDefaultSimplexMethod(
     target: TargetFunction,
     simplexMatrix: SimplexMatrix,
     firstStepBearingElement?: { element: MatrixElement, possibleElements: Array<MatrixElement> }
@@ -162,7 +162,8 @@ export function passDefaultSimplexMethod(
         [],
         {tags: [new Tags.HasResultTag()]}
     )
-    extractResult(simplexMatrix)
+
+    setResult(extractResult(simplexMatrix))
     return simplexMatrix;
 }
 
@@ -181,8 +182,7 @@ export function extractCoefficients(simplexMatrix: SimplexMatrix) : Array<Coeffi
 }
 
 export function extractResult(simplexMatrix: SimplexMatrix) {
-    const coefficients = extractCoefficients(simplexMatrix)
-    store.dispatch(setResult(coefficients))
+    return extractCoefficients(simplexMatrix)
 }
 
 function isSolution(simplexMatrix: SimplexMatrix) : boolean {

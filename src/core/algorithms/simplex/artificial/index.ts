@@ -5,7 +5,6 @@ import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
 import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {Matrix} from "@/core/domain/math/aliases/Matrix";
 import {deleteColumnByIndex} from "@/core/algorithms/arrayhelper";
-import {Rational} from "@/core/domain/math/classes/Rational";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
 import {appendSimplexStep, passDefaultSimplexMethod} from "@/core/algorithms/simplex";
 import {EMPTY_MATRIX_ELEMENT, MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
@@ -14,7 +13,7 @@ import {HasErrorTag} from "@/core/domain/math/enums/SimplexStepTag";
 import {store} from "@/redux/store";
 import {setResult} from "@/redux/slices/SimplexState";
 
-export function passArtificialSimplexMethod(
+export async function passArtificialSimplexMethod(
     target: TargetFunction,
     simplex: SimplexMatrix,
     additionalCoefficientIndexes: Array<number>,
@@ -83,10 +82,10 @@ export function passArtificialSimplexMethod(
     )
 
     const updatedSimplex = passToDefaultSimplex(target, simplex)
-    return passDefaultSimplexMethod(target, updatedSimplex);
+    return await passDefaultSimplexMethod(target, updatedSimplex);
 }
 
-export function artificialBasisMethod(
+export async function artificialBasisMethod(
     target: TargetFunction,
     constraints: Array<Equation>
 ) {
@@ -103,7 +102,7 @@ export function artificialBasisMethod(
     )
     fillSimplexMatrixLastRow(simplex.coefficientsMatrix)
 
-    passArtificialSimplexMethod(
+    return await passArtificialSimplexMethod(
         copiedTargetFunction,
         simplex,
         appendedCoefficients.map((el) => el.index)
@@ -138,9 +137,6 @@ export function copyConstraints(source: Array<Equation>) : Array<Equation> {
 
 function isArtificialSolution(simplexMatrix: SimplexMatrix) : boolean {
     const lastMatrixRowIndex = simplexMatrix.coefficientsMatrix.length - 1
-    simplexMatrix.coefficientsMatrix.forEach((array) => {
-        console.log(array.map((el) => Rational.fromNumber(el).toString()).join(', '))
-    })
 
     for (let i = 0; i < simplexMatrix.coefficientsMatrix[lastMatrixRowIndex].length; i++) {
         if (simplexMatrix.coefficientsMatrix[lastMatrixRowIndex][i] !== 0) {
@@ -164,7 +160,6 @@ function passToDefaultSimplex(
         target.func.replaceCoefficientByIndex(index, solved)
     })
 
-    console.log(target.toString())
     return SimplexMatrix.fromMathObjects(
         target, newEquations, simplex.columns, simplex.rows
     )

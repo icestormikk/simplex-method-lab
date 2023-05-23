@@ -1,5 +1,5 @@
 import React from 'react';
-import {Tab} from "@/interface/types/Tab";
+import {Tab} from "@/interface/domain/types/Tab";
 import {BiLock} from "react-icons/bi";
 
 interface TabElementProps {

@@ -38,7 +38,7 @@ function DefaultBasisPanel() {
         [isStartBasisInitialized, isTargetNotEmpty]
     )
 
-    const useMethod = () => {
+    const useMethod = async () => {
         const selectedColumnIndexes: Array<number> = []
         basisCoefficients.forEach((el, index) => {
             if (el > 0) {
@@ -48,7 +48,7 @@ function DefaultBasisPanel() {
 
         setLaunched(true)
         dispatch(clearSteps())
-        simplexMethod(
+        await simplexMethod(
             task.targetFunction,
             task.constraints,
             selectedColumnIndexes
@@ -94,8 +94,11 @@ function DefaultBasisPanel() {
                 {
                     !launched ? (
                         <MethodDescription
-                            header="Здесь будут отображаться шаги алгоритма"
-                            content="Описание алгоритма"
+                            header="Шаги алгоритма"
+                            content="Это метод последовательного перехода от одного
+                            базисного решения (вершины многогранника решений) системы ограничений задачи
+                            линейного программирования к другому базисному решению до тех пор, пока
+                            функция цели не примет оптимального значения (максимума или минимума)."
                         />
                     ) : (
                         <>

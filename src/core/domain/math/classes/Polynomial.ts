@@ -9,7 +9,7 @@ export default class Polynomial {
     private coefficients_: Array<Coefficient> = []
     public constant: number = 0
 
-    get coefficients() : Array<Coefficient> {
+    get coefficients(): Array<Coefficient> {
         return this.coefficients_
     }
 
@@ -71,12 +71,12 @@ export default class Polynomial {
         this.add(copiedReplacement)
     }
 
-    private getStyledConstant(isReversed = false) : string {
+    private getStyledConstant(isReversed = false): string {
         const updatedConstant = (isReversed ? (-1) : 1) * this.constant
         return updatedConstant !== 0 ? ((updatedConstant > 0 ? "+" : "") + Rational.fromNumber(updatedConstant)) : ''
     }
 
-    solveByCoefficient(index: number) : Polynomial {
+    solveByCoefficient(index: number): Polynomial {
         const suitableCoefficient = this.coefficients_.find((el) =>
             el.index === index
         )
@@ -92,7 +92,7 @@ export default class Polynomial {
         return new Polynomial(updatedCoefficients, this.constant * (-1))
     }
 
-    getValueIn(...multipliers: Array<number>) : number {
+    getValueIn(...multipliers: Array<number>): number {
         if (multipliers.length < this.coefficients.length) {
             console.warn(
                 `There are ${this.coefficients.length} variables in the polynomial, but ${multipliers.length} are passed. `
@@ -119,7 +119,7 @@ export default class Polynomial {
         return result + this.constant
     }
 
-    public copy() : Polynomial {
+    public copy(): Polynomial {
         return new Polynomial(
             this.coefficients.map((el) =>
                 new Coefficient(el.multiplier, el.index)
@@ -128,10 +128,12 @@ export default class Polynomial {
         )
     }
 
-    public toString() : string {
-        const withoutConstant = this.coefficients_.map((coefficient, index) =>
-            (index > 0 && coefficient.multiplier >= 0 ? '+' : '') + coefficient.toString()
-        ).join('')
+    public toString(): string {
+        const withoutConstant = this.coefficients_
+            .filter((coefficient) => coefficient.multiplier !== 0)
+            .map((coefficient, index) =>
+                (index > 0 && coefficient.multiplier >= 0 ? '+' : '') + coefficient.toString()
+            ).join('')
 
         return withoutConstant + this.getStyledConstant()
     }

@@ -1,29 +1,39 @@
 import JXG, {Line} from 'jsxgraph';
-import Coefficient from "@/core/domain/math/classes/Coefficient";
 import {Inequality} from "@/core/domain/math/classes/Inequality";
 import {TargetFunction} from "@/core/domain/math/classes/simplex/TargetFunction";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
 import Point from "@/core/domain/math/classes/Point";
 
+const CONSTRAINTS_LINE_COLOR = 'lightgray';
+
 function getRestructuredConstraintsInfo(inequalities: Inequality[], board: JXG.Board) {
     const inequalityAsObjects: unknown[] = []
     const lines: Line[] = []
 
+    const axisIndexes = inequalities
+        .find((el) =>
+            el.polynomial.coefficients.filter((coef) =>
+                coef.multiplier !== 0
+            ).length === 2
+        )
+        ?.polynomial.coefficients
+        .filter((el) => el.multiplier !== 0)
+        .map((el) => el.index) || [0, 1]
+
     inequalities.forEach((line) => {
-        const nonZeroCoefficients: Coefficient[] = []
-        line.polynomial.coefficients.forEach((el) => {
-            if (el.multiplier !== 0) {
-                nonZeroCoefficients.push(el)
-            }
-        })
+        const a = line.polynomial.coefficients.find((el) =>
+            el.index === axisIndexes[0]
+        )?.multiplier || 0
+        const b = line.polynomial.coefficients.find((el) =>
+            el.index === axisIndexes[1]
+        )?.multiplier || 1
 
         const l = board.create(
             'line',
             [
-                line.polynomial.constant,
-                nonZeroCoefficients[0].multiplier,
-                nonZeroCoefficients[1].multiplier
-            ]
+                line.polynomial.constant, a, b
+            ],
+            {strokeColor: CONSTRAINTS_LINE_COLOR}
         )
         lines.push(l)
         inequalityAsObjects.push(
@@ -35,13 +45,13 @@ function getRestructuredConstraintsInfo(inequalities: Inequality[], board: JXG.B
         )
     })
 
-    return {inequalityAsObjects, plotLines: lines}
+    return {inequalityAsObjects, plotLines: lines, axisIndexes}
 }
 
 function buildGeometryArea(board: JXG.Board, inequalityObjects: unknown[]) {
     const [x, y] = [
-        board.create('line', [0, 1, 0]),
-        board.create('line', [0, 0, 1])
+        board.create('line', [0, 1, 0], {strokeColor: CONSTRAINTS_LINE_COLOR}),
+        board.create('line', [0, 0, 1], {strokeColor: CONSTRAINTS_LINE_COLOR})
     ]
 
     let area = board.create(
@@ -72,7 +82,6 @@ function drawNormalVector(board: JXG.Board, target: TargetFunction) {
         .slice(0, 2)
         .map((el) => el.multiplier)
 
-    console.log(target.toString())
     if (target.extremumType === ExtremumType.MINIMUM) {
         for (let i = 0; i < coordsTo.length; i++) {
             coordsTo[i] *= -1
@@ -84,43 +93,25 @@ function drawNormalVector(board: JXG.Board, target: TargetFunction) {
         [
             board.create('point', coordsFrom),
             board.create('point', coordsTo)
-        ]
+        ],
+        {strokeColor: 'orange'}
     )
 }
 
-function getAllIntersectionPointsInFirstQuarter(board: JXG.Board, lines: Array<Line>) {
-    const points: Array<Point> = []
+function drawIntersectionPointsInFirstQuarter(board: JXG.Board, lines: Array<Line>) {
     for (let i = 0; i < lines.length - 1; i++) {
         for (let j = i + 1; j < lines.length; j++) {
-            const intersection = board.create(
+            board.create(
                 'intersection',
                 [lines[i], lines[j]],
                 {opacity: 0.0}
             )
-
-            points.push(
-                new Point(intersection.X(), intersection.Y())
-            )
         }
     }
-
-    return points.filter((point) => {
-        function isInFirstQuarter() {
-            for (const coordinate of point.coordinates) {
-                if (coordinate < 0) {
-                    return false
-                }
-            }
-            return true
-        }
-
-        return isInFirstQuarter()
-    })
 }
 
 function getResult(sourceTarget: TargetFunction, points: Array<Point>) {
     const pointToValue = points.map((point) => {
-        console.log(point.coordinates)
         return {
             point,
             value: sourceTarget.func.getValueIn(...point.coordinates)
@@ -135,19 +126,26 @@ function getResult(sourceTarget: TargetFunction, points: Array<Point>) {
 }
 
 export function passPlotStep(
+    resultBySimplex: Array<number>,
     shortedTarget: TargetFunction,
     inequalities: Array<Inequality>
 ) {
     const board = JXG.JSXGraph.initBoard(
-        'jxgbox', {boundingbox: [-8, 8, 8, -8], axis: true}
+        'jxgbox', {boundingbox: [-10, 10, 10, -10], axis: true}
     );
 
-    const {inequalityAsObjects, plotLines} = getRestructuredConstraintsInfo(inequalities, board)
+    const {inequalityAsObjects, plotLines, axisIndexes} = getRestructuredConstraintsInfo(inequalities, board)
     const {axis} = buildGeometryArea(board, inequalityAsObjects)
     drawNormalVector(board, shortedTarget)
 
-    const intersectionPoints = getAllIntersectionPointsInFirstQuarter(board, [...plotLines, ...axis])
-    const extremum = getResult(shortedTarget, intersectionPoints)
+    drawIntersectionPointsInFirstQuarter(board, [...plotLines, ...axis])
+    board.create(
+        'point',
+        [
+            resultBySimplex[axisIndexes[0]], resultBySimplex[axisIndexes[1]]
+        ],
+        {fillColor: 'red'}
+    )
 
-    return extremum.point
+    return {axisIndexes}
 }

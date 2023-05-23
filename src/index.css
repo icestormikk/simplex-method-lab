@@ -24,7 +24,8 @@
         -webkit-appearance: none;
         margin: 0;
     }
-    input[type=number]{
+
+    input[type=number] {
         -moz-appearance: textfield;
     }
 }
@@ -35,6 +36,7 @@
         color: #646cff;
         text-decoration: inherit;
     }
+
     a:hover {
         color: #535bf2;
     }
@@ -61,9 +63,11 @@
         cursor: pointer;
         transition: border-color 0.25s;
     }
+
     button:hover {
         border-color: #646cff;
     }
+
     button:focus,
     button:focus-visible {
         outline: 4px auto -webkit-focus-ring-color;
@@ -80,9 +84,10 @@
         @apply
         flex md:flex-row flex-col
     }
+
     form input {
         @apply
-        bordered rounded-sm
+        bordered rounded-sm px-2 py-0.5
     }
 }
 
@@ -91,110 +96,169 @@
         @apply
         flex items-center justify-center
     }
+
     .bordered {
         @apply
         border-gray-300 border-[1px]
     }
+
     #root {
         @apply
         h-screen w-screen centered
     }
+
     .App {
         @apply
         flex justify-start items-start flex-col w-full h-full relative
     }
+
     .steps-container {
         @apply
         w-full flex justify-start items-start gap-2 flex-col px-2
     }
+
     .simplex-step-view {
         @apply
         flex lg:flex-row flex-col gap-2 w-full relative bordered rounded-md shadow-md
     }
+
     .change-element-block {
         @apply
         flex justify-end items-end flex-col
     }
+
     .simplex-step-view .change-element-block {
         @apply
         hidden
     }
+
     .simplex-step-view:hover .change-element-block {
         @apply
         flex
     }
+
     .simplex-step-number-block {
         @apply
         centered font-bold text-[1.2rem] text-white rounded-md p-2 bg-gray-500
         h-8 w-8
     }
+
     .steps-container:hover {
         @apply
         bg-gray-100/80 duration-200 transition-all
     }
+
     .menu-item {
         @apply
         text-sm bg-gray-200 text-gray-600 py-0.5 px-2 flex flex-row
         gap-2 bordered justify-start items-center w-44 rounded-none
     }
+
     .menu-item:not(:last-child) {
         @apply
         border-r-[1px] border-r-gray-400
     }
+
     .simplex-matrix-table {
         @apply
         w-max flex flex-row gap-2
     }
+
     .simplex-matrix-table td {
         @apply
         h-10 w-16 max-h-[2.5rem] min-w-[4rem] border-[1px] border-gray-300 hover:bg-gray-300/50
         px-0.5 text-center font-bold
     }
+
     .simplex-matrix-table td.titled-cell {
         @apply
         bg-gray-200/80
     }
+
     .simplex-matrix-table input[type="number"] {
         @apply
         flex h-8 w-14 bg-transparent text-center
     }
+
     .tab-element {
         @apply
         centered text-base px-2 py-0.5 flex-row gap-1 border-t-[1px]
         border-t-gray-300 border-x-[1px] border-x-gray-300
     }
-    .tab-element:first-child {
-        @apply
-        rounded-tl-md ml-1
-    }
+
     .tab-element:last-child {
         @apply
         rounded-tr-md
     }
+
     .constraints-menu-panel {
         @apply
         m-1 p-2 rounded-xl border-[1px] border-gray-300 shadow-md w-full flex
         flex-col gap-2
     }
+
+    .constraints-menu-panel > div > button {
+        @apply
+        w-max px-2 rounded-md bg-gray-100 bordered hover:bg-gray-200
+        transition-colors duration-100
+    }
+
     .step-additional-content {
         @apply
         flex flex-col gap-1
     }
+
     .step-additional-content p {
         @apply
         text-xl
     }
+
     .step-additional-content li {
         @apply
         text-gray-500
     }
+
     .graphical-elements-info-block {
         @apply
         flex flex-col gap-2
     }
+
+    .graphical-elements-info-block div {
+        @apply
+        flex flex-col gap-2 bordered px-2 rounded-md
+        shadow-md
+    }
+
     .graphical-elements-info-block span {
         @apply
         text-right
+    }
+
+    .success-text {
+        @apply
+        text-green-600 font-bold
+    }
+
+    .submit-button {
+        @apply
+        rounded-md bg-green-600/70 shadow-md px-2 py-0.5 text-white
+    }
+
+    .used-tech-table {
+        @apply
+        flex flex-col w-[50rem] bordered shadow-md rounded-xl
+    }
+    .used-tech-table thead {
+        @apply
+        w-full border-b-[2px] text-center centered
+    }
+    .used-tech-table tr {
+        @apply
+        border-y-[1px] px-2
+    }
+    .used-tech-table td {
+        @apply
+        w-full p-2
     }
 }
 

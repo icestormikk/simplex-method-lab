@@ -18,10 +18,13 @@ import {allElementsAreZero} from "@/core/algorithms/arrayhelper";
 import {Equation} from "@/core/domain/math/classes/Equation";
 import Polynomial from "@/core/domain/math/classes/Polynomial";
 import Coefficient from "@/core/domain/math/classes/Coefficient";
+import {AiOutlineDownload} from "react-icons/ai";
+import DownloadModalContent from "@/interface/Menu/constraints/DownloadModalContent";
 
 function ConstraintsMenu() {
     const dispatch = useAppDispatch()
     const [isUploadModalOpen, setIsUploadModalOpen] = React.useState(false)
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = React.useState(false)
     const targetFunction = useAppSelector((state) => state.main.targetFunction)
     const constraints = useAppSelector((state) => state.main.constraints)
     const fractionViewMode = useAppSelector((state) => state.main.fractionViewMode)
@@ -71,12 +74,24 @@ function ConstraintsMenu() {
             <CurrentTargetFunctionBlock/>
             <div className="constraints-menu-panel">
                 <b>Коэффициенты целевой функции и ограничений:</b>
-                <button
-                    type="button"
-                    onClick={() => setIsUploadModalOpen(true)}
-                >
-                    Open
-                </button>
+                <div className="flex flex-row gap-2">
+                    <button
+                        type="button"
+                        className="centered gap-2"
+                        onClick={() => setIsUploadModalOpen(true)}
+                    >
+                        <AiOutlineDownload/>
+                        Загрузить из файла
+                    </button>
+                    <button
+                        type="button"
+                        className="centered gap-2"
+                        onClick={() => setIsDownloadModalOpen(true)}
+                    >
+                        <AiOutlineDownload/>
+                        Сохранить в файл
+                    </button>
+                </div>
                 <CoefficientsBuilderTable
                     configuration={{
                         target: configuration.target,
@@ -151,14 +166,30 @@ function ConstraintsMenu() {
                     <span>Сбросить</span>
                 </button>
             </div>
-            <ModalWindow
-                isOpen={isUploadModalOpen}
-                setIsOpen={setIsUploadModalOpen}
-                title="Загрузить из файла"
-                content={(
-                    <UploadModalContent/>
-                )}
-            />
+            {
+                isUploadModalOpen && (
+                    <ModalWindow
+                        isOpen={isUploadModalOpen}
+                        setIsOpen={setIsUploadModalOpen}
+                        title="Загрузить из файла"
+                        content={(
+                            <UploadModalContent/>
+                        )}
+                    />
+                )
+            }
+            {
+                isDownloadModalOpen && (
+                    <ModalWindow
+                        isOpen={isDownloadModalOpen}
+                        setIsOpen={setIsDownloadModalOpen}
+                        title="Сохранить в файл"
+                        content={(
+                            <DownloadModalContent/>
+                        )}
+                    />
+                )
+            }
         </div>
     );
 }

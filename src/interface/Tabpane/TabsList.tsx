@@ -1,6 +1,6 @@
 import React from 'react';
-import {Tab} from "@/interface/types/Tab";
 import TabElement from "@/interface/Tabpane/TabElement";
+import {Tab} from "@/interface/domain/types/Tab";
 
 interface TabListProps {
     tabs: Array<Tab>,

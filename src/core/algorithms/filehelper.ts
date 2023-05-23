@@ -23,6 +23,34 @@ export async function readFileAsSimplexEntities(
     return convertDataToSimplexEntities(lines)
 }
 
+export async function writeToFile(
+    source: {target: TargetFunction, constraints: Array<Equation>},
+    filepath: string
+) {
+    const result: {message: string | undefined} = {message: undefined}
+    const targetAsString = source.target
+        .func.coefficients.map((coefficient) => coefficient.multiplier)
+        .concat(source.target.func.constant)
+        .join(' ')
+    const constraintsAsString = source.constraints
+        .map((constraint) => {
+            return constraint
+                .polynomial.coefficients.map((coefficient) => coefficient.multiplier)
+                .concat(constraint.value)
+                .join(' ')
+        })
+        .join('\n')
+
+    fs.writeFile(filepath, targetAsString + '\n' + constraintsAsString, {},(err) => {
+        if (err) {
+            result.message = `Error while saving: ${err}`
+        }
+        return undefined
+    })
+
+    return result
+}
+
 function convertDataToSimplexEntities(
     lines: Array<string>
 ) {

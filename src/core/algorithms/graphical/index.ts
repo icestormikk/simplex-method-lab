@@ -26,6 +26,12 @@ export function graphicalMethod(
         copiedTargetFunction.func.replaceCoefficientByIndex(column, solved)
     })
 
+    console.log(
+        constraintsList.map((cons) => cons.toString())
+    )
+    console.log(
+        copiedTargetFunction.toString()
+    )
     return {
         updatedTarget: copiedTargetFunction,
         constraintsList
