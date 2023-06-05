@@ -48,7 +48,7 @@ function DefaultBasisPanel() {
 
         setLaunched(true)
         dispatch(clearSteps())
-        await simplexMethod(
+        simplexMethod(
             task.targetFunction,
             task.constraints,
             selectedColumnIndexes
@@ -60,12 +60,12 @@ function DefaultBasisPanel() {
             <div className="flex gap-2">
                 <ConditionNotification
                     condition={isTargetNotEmpty}
-                    successText="Условие выполнено"
+                    successText="1-ое условие выполнено"
                     failureText="Необходимо определить условия задачи"
                 />
                 <ConditionNotification
                     condition={isStartBasisInitialized}
-                    successText="Условие выполнено"
+                    successText="2-ое условие выполнено"
                     failureText="Определите базис"
                 />
             </div>

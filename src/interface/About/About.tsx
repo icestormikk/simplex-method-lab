@@ -41,7 +41,7 @@ function About() {
             {
                 icon: <img src={reduxLogo} alt=""/>,
                 title: "Вспомогательные библиотеки",
-                instrumentTitle: "Redux, ReactIcons, JSXGraph and etc"
+                instrumentTitle: "Redux, ReactIcons, JSXGraph"
             },
             {
                 icon: <img src={tailwindLogo} alt=""/>,
@@ -54,6 +54,7 @@ function About() {
 
     return (
         <div className="centered h-full w-full text-xl text-center flex-col">
+            <h1>Simplex Application</h1>
             <div className="flex gap-2 mb-4">
                 <p>Программа написана пользователем </p>
                 <ExternalUrl
@@ -62,9 +63,19 @@ function About() {
                     icon={(<BsGithub/>)}
                 />
             </div>
+            <div>
+                <p>Исходный код приложения размещён в </p>
+                <ExternalUrl
+                    url="https://github.com/icestormikk/simplex-method-lab.git"
+                    title="репозитории"
+                    icon={(<BsGithub/>)}
+                />
+            </div>
             <table className="used-tech-table">
                 <thead>
-                    <th>Стек использованных инструментов</th>
+                    <tr>
+                        <td>Стек использованных инструментов</td>
+                    </tr>
                 </thead>
                 <tbody>
                     {

@@ -46,7 +46,7 @@ export async function passArtificialSimplexMethod(
                 }
             )
             store.dispatch(setResult(undefined))
-            throw new Error(`Cant find the bearing element: ${e.message}`)
+            throw new Error(`Система условий противоречива.`)
         }
 
         const {newMatrix, calculations} = simplex.makeStep(bearingElements.element)
@@ -82,7 +82,7 @@ export async function passArtificialSimplexMethod(
     )
 
     const updatedSimplex = passToDefaultSimplex(target, simplex)
-    return await passDefaultSimplexMethod(target, updatedSimplex);
+    return passDefaultSimplexMethod(target, updatedSimplex);
 }
 
 export async function artificialBasisMethod(

@@ -10,6 +10,9 @@ import {artificialBasisMethod} from "@/core/algorithms/simplex/artificial";
 import {extractResult} from "@/core/algorithms/simplex";
 import {Rational} from "@/core/domain/math/classes/Rational";
 import {setResult} from "@/redux/slices/SimplexState";
+import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
+import ConditionNotification from "@/interface/ConditionNotification";
+import MethodDescription from "@/interface/Basis/MethodDescription";
 
 function GraphicalMethodPanel() {
     const target = useAppSelector((state) => state.main.targetFunction)
@@ -25,16 +28,30 @@ function GraphicalMethodPanel() {
         shortedTarget: undefined,
         result: undefined
     })
+    const [error, setError] = React.useState<string|undefined>(undefined)
+    const isSuitable = React.useCallback(
+        () => {
+            return !target.isEmpty() && constraints.length !== 0
+        },
+        [target, constraints]
+    )
 
     const useMethod = async () => {
+        setError(undefined)
         const {updatedTarget, constraintsList} = graphicalMethod(target, constraints)
         const inequalities = constraintsList
             .map((polynomial) =>
                 new Inequality(polynomial, ">=", 0)
             )
 
-        const result = await artificialBasisMethod(target, constraints)
-        setResult(extractResult(result))
+        let result: SimplexMatrix;
+        try {
+            result = await artificialBasisMethod(target, constraints)
+            setResult(extractResult(result))
+        } catch (e: any) {
+            setError(e.message)
+            return
+        }
 
         if (!simplexResult) { return }
         const {axisIndexes} = passPlotStep(
@@ -60,66 +77,92 @@ function GraphicalMethodPanel() {
     }
 
     return (
-        <div className="w-full h-full centered">
-            <div className="centered w-max flex-col h-full p-2 bordered shadow-md">
-                <div className="flex justify-start gap-2 items-start h-max">
-                    <div className="flex flex-col gap-2">
-                        <button
-                            type="button"
-                            className="w-max bordered px-2 py-1 rounded text-[#efefef]
+        <div className="w-full h-full flex justify-start items-center flex-col gap-2">
+            <ConditionNotification
+                condition={isSuitable()}
+                successText="Условие выполнено"
+                failureText="Введите условие задачи"
+            />
+            {
+                !isSuitable() ? (
+                    <MethodDescription
+                        header="Шаги алгоритма"
+                        content="Основан на геометрической интерпретации задачи
+                        линейного программирования и применяется в основном при
+                        решении задач двумерного пространства и только некоторых
+                        задач трёхмерного пространства"
+                    />
+                ) : (
+                    <div className="centered w-max flex-col h-full p-2 bordered shadow-md">
+                        <div className="flex justify-start gap-2 items-start h-max">
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    type="button"
+                                    className="w-max bordered px-2 py-1 rounded text-[#efefef]
                             centered gap-2 bg-green-600 h-min"
-                            onClick={() => {
-                                useMethod()
-                                    .then(() => console.log('finish'))
-                            }}
-                        >
-                            Применить
-                        </button>
-                        <ElementsInformationPanel
-                            inequalities={configuration.inequalities}
-                            sourceTarget={target}
-                            shortedTarget={configuration.shortedTarget}
-                            result={configuration.result}
-                        />
-                    </div>
-                    <div
-                        id="jxgbox"
-                        className="jxgbox h-[800px] w-[800px] bordered border-gray-400
+                                    onClick={() => {
+                                        useMethod()
+                                            .then(() => console.log('finish'))
+                                    }}
+                                >
+                                    Применить метод
+                                </button>
+                                <ElementsInformationPanel
+                                    inequalities={configuration.inequalities}
+                                    sourceTarget={target}
+                                    shortedTarget={configuration.shortedTarget}
+                                    result={configuration.result}
+                                />
+                            </div>
+                            <div
+                                id="jxgbox"
+                                className="jxgbox h-[800px] w-[800px] bordered border-gray-400
                         border-[2px] rounded-md centered"
-                    >
-                        <b className="px-2 text-center text-gray-300 text-xl">
-                            Для получения графика нажмите кнопку "Применить"
-                        </b>
-                    </div>
-                </div>
-                {
-                    (simplexResult && configuration.result && plotExtremum) && (
-                        <div className="bg-green-800/80 text-white w-full p-2 rounded-md
-                        shadow-md shadow-gray-400 mt-4">
-                            <div className="flex gap-2">
-                                <b>Точка на графике: </b>
-                                <span>({plotExtremum.map((el) => Rational.fromNumber(el)).join(', ')})</span>
-                            </div>
-                            <div className="flex gap-2">
-                                <b>Точка:</b>
-                                <span>
-                                ({
-                                    simplexResult
-                                        .map((el) =>
-                                            Rational.fromNumber(el).toString()
-                                        )
-                                        .join(', ')
-                                })
-                            </span>
-                            </div>
-                            <div className="flex gap-2">
-                                <b>Значение F(x):</b>
-                                <span>{Rational.fromNumber(configuration.result.value).toString()}</span>
+                            >
+                                <b className="px-2 text-center text-gray-300 text-xl">
+                                    Для получения графика нажмите кнопку "Применить"
+                                </b>
                             </div>
                         </div>
-                    )
-                }
-            </div>
+                        {
+                            (!error && simplexResult && configuration.result && plotExtremum) && (
+                                <div className="bg-green-800/80 text-white w-full p-2 rounded-md
+                        shadow-md shadow-gray-400 mt-4">
+                                    <div className="flex gap-2">
+                                        <b>Точка на графике: </b>
+                                        <span>({plotExtremum.map((el) => Rational.fromNumber(el)).join(', ')})</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <b>Точка:</b>
+                                        <span>
+                                ({
+                                            simplexResult
+                                                .map((el) =>
+                                                    Rational.fromNumber(el).toString()
+                                                )
+                                                .join(', ')
+                                        })
+                            </span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <b>Значение F(x):</b>
+                                        <span>{Rational.fromNumber(configuration.result.value).toString()}</span>
+                                    </div>
+                                </div>
+                            )
+                        }
+                        {
+                            error && (
+                                <div className="bg-red-600 text-white w-full p-2 rounded-md
+                        shadow-md shadow-gray-400 mt-4 text-center">
+                                    <p>Не удалось применить графический метод решения:</p>
+                                    <b>{error}</b>
+                                </div>
+                            )
+                        }
+                    </div>
+                )
+            }
         </div>
     );
 }

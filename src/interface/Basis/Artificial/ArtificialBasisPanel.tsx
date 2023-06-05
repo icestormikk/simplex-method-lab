@@ -21,10 +21,10 @@ function ArtificialBasisPanel() {
         [task.targetFunction]
     )
 
-    const useMethod = () => {
+    const useMethod = async () => {
         setLaunched(true)
         dispatch(clearSteps())
-        artificialBasisMethod(
+        await artificialBasisMethod(
             task.targetFunction, task.constraints
         )
     }
