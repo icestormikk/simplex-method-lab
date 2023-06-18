@@ -10,7 +10,7 @@ interface TabListProps {
 function TabsList({tabs, tabIndexChanger}: TabListProps) {
     return (
         <div
-            className="flex justify-start items-start"
+            className="flex justify-start items-start w-full"
         >
             {
                 tabs.map((tab, index) => (

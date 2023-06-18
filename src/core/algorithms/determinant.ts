@@ -1,7 +1,7 @@
 import gauss, {REVERSE_NUMBER_SIGN} from "./gauss";
 import {ROUNDING_ACCURACY} from "@/core/constants";
 import {Matrix} from "@/core/domain/math/aliases/Matrix";
-import {GaussState} from "@/core/algorithms/gauss/modes";
+import {GaussState} from "@/core/algorithms/gauss/gaussState";
 
 
 export default function determinant(matrix: Matrix<number>) {

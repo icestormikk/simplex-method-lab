@@ -32,6 +32,10 @@ export class Rational {
         return new Rational(bestRational.numerator, bestRational.denominator)
     }
 
+    static isRational(value: string) : boolean {
+        return RegExp(/[0-9]+\/[0-9]+/ig).test(value)
+    }
+
     add(value: Rational) : Rational {
         const {numerator, denominator} = Rational.fromNumber(this.toNumber() + value.toNumber())
         this.numerator = numerator

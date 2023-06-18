@@ -6,22 +6,14 @@ import ArtificialBasisPanel from "@/interface/Basis/Artificial/ArtificialBasisPa
 import DefaultBasisPanel from "@/interface/Basis/Default/DefaultBasisPanel";
 import GraphicalMethodPanel from "@/interface/Graphics/GraphicalMethodPanel";
 import About from "@/interface/About/About";
+import {BiQuestionMark} from "react-icons/bi";
+import {BsPerson} from "react-icons/bs";
+import Help from "@/interface/Help/Help";
 
 function App() {
     const tabs = React.useMemo(
         () => {
             return [
-                {
-                    tab: {
-                        title: 'Об авторе',
-                        icon: undefined,
-                        action: () => {},
-                        isBlocked: false
-                    },
-                    content: (
-                        <About/>
-                    )
-                },
                 {
                     tab: {
                         title: 'Условия задачи',
@@ -57,13 +49,35 @@ function App() {
                 },
                 {
                     tab: {
-                        title: 'Графический метод',
+                        title: 'Графический метод (2D)',
                         icon: undefined,
                         action: () => {},
                         isBlocked: false
                     },
                     content: (
                         <GraphicalMethodPanel/>
+                    )
+                },
+                {
+                    tab: {
+                        title: 'Об авторе',
+                        icon: <BsPerson/>,
+                        action: () => {},
+                        isBlocked: false
+                    },
+                    content: (
+                        <About/>
+                    )
+                },
+                {
+                    tab: {
+                        title: 'Справка',
+                        icon: <BiQuestionMark/>,
+                        action: () => {},
+                        isBlocked: false
+                    },
+                    content: (
+                        <Help/>
                     )
                 }
             ]

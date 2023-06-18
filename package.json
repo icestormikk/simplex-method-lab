@@ -1,6 +1,6 @@
 {
   "name": "simplex-method-app",
-  "version": "1.8.0",
+  "version": "1.4",
   "main": "dist-electron/main/index.js",
   "description": "Electron Vite React boilerplate.",
   "author": "icestormikk",

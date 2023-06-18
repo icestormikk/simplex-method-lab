@@ -196,7 +196,7 @@ export default class SimplexMatrix {
                 const elementAsObject = {multiplier: element, rowIndex: i, columnIndex: column.columnIndex}
 
                 possibleElements.push(elementAsObject)
-                if ((min === undefined || div < minDiv) && elementAsObject.columnIndex == maxElementColumnIndex) {
+                if ((min === undefined || div <= minDiv) && elementAsObject.columnIndex == maxElementColumnIndex) {
                     minDiv = div
                     min = elementAsObject
                 }

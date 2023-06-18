@@ -20,11 +20,13 @@ import Polynomial from "@/core/domain/math/classes/Polynomial";
 import Coefficient from "@/core/domain/math/classes/Coefficient";
 import {AiOutlineDownload} from "react-icons/ai";
 import DownloadModalContent from "@/interface/Menu/constraints/DownloadModalContent";
+import {BiCalculator} from "react-icons/bi";
 
 function ConstraintsMenu() {
     const dispatch = useAppDispatch()
     const [isUploadModalOpen, setIsUploadModalOpen] = React.useState(false)
     const [isDownloadModalOpen, setIsDownloadModalOpen] = React.useState(false)
+    const [isBuilderTableOpen ,setIsBuilderTableOpen] = React.useState(false);
     const targetFunction = useAppSelector((state) => state.main.targetFunction)
     const constraints = useAppSelector((state) => state.main.constraints)
     const fractionViewMode = useAppSelector((state) => state.main.fractionViewMode)
@@ -69,6 +71,24 @@ function ConstraintsMenu() {
         })
     }
 
+    React.useEffect(
+        () => {
+            setConfiguration({
+                target: targetFunction.copy(),
+                constraints: constraints.map((eq) => eq.copy()),
+                fractionView: fractionViewMode
+            })
+        },
+        [targetFunction, constraints]
+    )
+
+    React.useEffect(
+        () => {
+            setIsBuilderTableOpen(false)
+        },
+        [isUploadModalOpen, isDownloadModalOpen]
+    )
+
     return (
         <div className="flex justify-start items-start flex-col">
             <CurrentTargetFunctionBlock/>
@@ -91,13 +111,25 @@ function ConstraintsMenu() {
                         <AiOutlineDownload/>
                         Сохранить в файл
                     </button>
+                    <button
+                        type="button"
+                        className="centered gap-2"
+                        onClick={() => setIsBuilderTableOpen((prevState) => !prevState)}
+                    >
+                        <BiCalculator/>
+                        Ввести вручную
+                    </button>
                 </div>
-                <CoefficientsBuilderTable
-                    configuration={{
-                        target: configuration.target,
-                        constraints: configuration.constraints
-                    }}
-                />
+                {
+                    isBuilderTableOpen && (
+                        <CoefficientsBuilderTable
+                            configuration={{
+                                target: configuration.target,
+                                constraints: configuration.constraints
+                            }}
+                        />
+                    )
+                }
             </div>
             <div className="w-full adaptive-flex">
                 <div className="constraints-menu-panel">

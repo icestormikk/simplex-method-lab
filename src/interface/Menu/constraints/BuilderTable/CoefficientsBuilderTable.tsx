@@ -14,6 +14,7 @@ import {
 import Warning from "@/interface/Messages/Warning";
 import BuilderTableButton from "@/interface/Menu/constraints/BuilderTable/BuilderTableButton";
 import {Equation} from "@/core/domain/math/classes/Equation";
+import {fromRationalString} from "@/core/algorithms/numberhelper";
 
 interface CoefficientBuilderTableProps {
     configuration: {
@@ -144,11 +145,16 @@ function CoefficientsBuilderTable({configuration}: CoefficientBuilderTableProps)
                                 .map((coefficient, index) => (
                                     <td key={index}>
                                         <input
-                                            type="number"
-                                            defaultValue={typeof coefficient !== 'number' ? coefficient.multiplier : 0}
+                                            type="text"
+                                            defaultValue={typeof coefficient !== 'number' ? Rational.fromNumber(coefficient.multiplier).toString() : 0}
                                             onChange={(event) => {
-                                                const value = Number(event.target.value)
-                                                coefficient = onChangeTargetCoefficient(value, coefficient);
+                                                const val = event.target.value
+                                                let num = Number(val)
+                                                if (Rational.isRational(val)) {
+                                                    num = fromRationalString(val)
+                                                }
+
+                                                coefficient = onChangeTargetCoefficient(num, coefficient);
                                             }}
                                         />
                                     </td>
@@ -175,15 +181,20 @@ function CoefficientsBuilderTable({configuration}: CoefficientBuilderTableProps)
                                                 key={elIndex}
                                             >
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     defaultValue={
                                                         element instanceof Coefficient
                                                             ? Rational.fromNumber(element.multiplier).toString()
-                                                            : element
+                                                            : `${element}`
                                                     }
                                                     onChange={(event) => {
-                                                        const value = Number(event.target.value)
-                                                        element = onChangeConstraintsCoefficient(value, element, index);
+                                                        const val = event.target.value;
+                                                        let num = Number(val)
+                                                        if (Rational.isRational(val)) {
+                                                            num = fromRationalString(val)
+                                                        }
+
+                                                        element = onChangeConstraintsCoefficient(num, element, index);
                                                     }}
                                                 />
                                             </td>

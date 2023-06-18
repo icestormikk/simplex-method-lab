@@ -38,42 +38,43 @@ function GraphicalMethodPanel() {
 
     const useMethod = async () => {
         setError(undefined)
-        const {updatedTarget, constraintsList} = graphicalMethod(target, constraints)
-        const inequalities = constraintsList
-            .map((polynomial) =>
-                new Inequality(polynomial, ">=", 0)
-            )
-
-        let result: SimplexMatrix;
         try {
+            const {updatedTarget, constraintsList} = graphicalMethod(target, constraints)
+            const inequalities = constraintsList
+                .map((polynomial) =>
+                    new Inequality(polynomial, ">=", 0)
+                )
+
+            let result: SimplexMatrix;
+
             result = await artificialBasisMethod(target, constraints)
             setResult(extractResult(result))
+
+            if (!simplexResult) { return }
+            const {axisIndexes} = passPlotStep(
+                simplexResult,
+                updatedTarget,
+                inequalities
+            )
+            setPlotExtremum(
+                simplexResult.filter((_, index) =>
+                    axisIndexes?.includes(index)
+                ) || []
+            )
+            setConfiguration((prevState) => {
+                prevState.inequalities = [...inequalities]
+                prevState.shortedTarget = updatedTarget
+                prevState.result = {
+                    point: new Point(...simplexResult!),
+                    value: target.func.getValueIn(...simplexResult)
+                }
+
+                return {...prevState}
+            })
         } catch (e: any) {
             setError(e.message)
             return
         }
-
-        if (!simplexResult) { return }
-        const {axisIndexes} = passPlotStep(
-            simplexResult,
-            updatedTarget,
-            inequalities
-        )
-        setPlotExtremum(
-            simplexResult.filter((_, index) =>
-                axisIndexes?.includes(index)
-            ) || []
-        )
-        setConfiguration((prevState) => {
-            prevState.inequalities = [...inequalities]
-            prevState.shortedTarget = updatedTarget
-            prevState.result = {
-                point: new Point(...simplexResult!),
-                value: target.func.getValueIn(...simplexResult)
-            }
-
-            return {...prevState}
-        })
     }
 
     return (
@@ -86,7 +87,7 @@ function GraphicalMethodPanel() {
             {
                 !isSuitable() ? (
                     <MethodDescription
-                        header="Шаги алгоритма"
+                        header="Графический метод"
                         content="Основан на геометрической интерпретации задачи
                         линейного программирования и применяется в основном при
                         решении задач двумерного пространства и только некоторых

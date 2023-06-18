@@ -175,7 +175,7 @@
         bg-gray-200/80
     }
 
-    .simplex-matrix-table input[type="number"] {
+    .simplex-matrix-table input {
         @apply
         flex h-8 w-14 bg-transparent text-center
     }
@@ -183,7 +183,7 @@
     .tab-element {
         @apply
         centered text-base px-2 py-0.5 flex-row gap-1 border-t-[1px]
-        border-t-gray-300 border-x-[1px] border-x-gray-300
+        border-t-gray-300 border-x-[1px] border-x-gray-300 w-full h-full
     }
 
     .tab-element:last-child {
@@ -254,7 +254,11 @@
     }
     .used-tech-table tr {
         @apply
-        border-y-[1px] px-2
+        px-2
+    }
+    .used-tech-table tr:not(:first-child) {
+        @apply
+        border-t-[1px]
     }
     .used-tech-table td {
         @apply

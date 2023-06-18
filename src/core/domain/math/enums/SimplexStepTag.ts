@@ -16,12 +16,12 @@ export class ArtificialSimplexEndTag extends SimplexStepTag {
 }
 export class DefaultSimplexStartTag extends SimplexStepTag {
     constructor() {
-        super("Начался этап применения обычного симплекс-метода");
+        super("Начался этап применения симплекс-метода");
     }
 }
 export class DefaultSimplexEndTag extends SimplexStepTag {
     constructor() {
-        super("Начался этап применения обычного симплекс-метода");
+        super("Начался этап применения симплекс-метода");
     }
 }
 export class HasResultTag extends SimplexStepTag {

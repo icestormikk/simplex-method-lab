@@ -55,7 +55,7 @@ function About() {
     return (
         <div className="centered h-full w-full text-xl text-center flex-col">
             <h1>Simplex Application</h1>
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2">
                 <p>Программа написана пользователем </p>
                 <ExternalUrl
                     url="https://github.com/icestormikk"
@@ -63,7 +63,8 @@ function About() {
                     icon={(<BsGithub/>)}
                 />
             </div>
-            <div>
+            <span className="text-gray-500 text-base">Текущая версия приложения: 1.4</span>
+            <div className="mt-4 flex gap-2">
                 <p>Исходный код приложения размещён в </p>
                 <ExternalUrl
                     url="https://github.com/icestormikk/simplex-method-lab.git"

@@ -70,6 +70,21 @@ export function simplexMethod(
     const matrixConstraints = Equation.toMatrix(constraints)
     try {
         gauss(matrixConstraints, validatedSelectedColumns)
+        console.log(matrixConstraints)
+
+        const equations = Equation.fromMatrix(matrixConstraints)
+
+        equations.forEach((eq, index) => {
+            const column = validatedSelectedColumns[index];
+            const solved = eq.solveByCoefficient(column)
+            copyTF.func.replaceCoefficientByIndex(column, solved)
+        })
+
+        let simplexMatrix = SimplexMatrix.fromMathObjects(
+            copyTF, equations, allColumnIndexes, selectedColumnIndexes
+        )
+
+        passDefaultSimplexMethod(copyTF, simplexMatrix);
     } catch (e: any) {
         store.dispatch(
             setResult(undefined)
@@ -81,24 +96,11 @@ export function simplexMethod(
             undefined,
             undefined,
             {
-                tags: [new Tags.HasErrorTag("Ошибка при определении базиса")]
+                tags: [new Tags.HasErrorTag(e.message)]
             }
         )
         throw new Error(e.message)
     }
-    const equations = Equation.fromMatrix(matrixConstraints)
-
-    equations.forEach((eq, index) => {
-        const column = validatedSelectedColumns[index];
-        const solved = eq.solveByCoefficient(column)
-        copyTF.func.replaceCoefficientByIndex(column, solved)
-    })
-
-    let simplexMatrix = SimplexMatrix.fromMathObjects(
-        targetFunction, equations, allColumnIndexes, selectedColumnIndexes
-    )
-
-    passDefaultSimplexMethod(copyTF, simplexMatrix);
 }
 
 export function passDefaultSimplexMethod(

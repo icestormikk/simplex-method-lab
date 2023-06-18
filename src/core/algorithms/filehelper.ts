@@ -5,6 +5,8 @@ import {allElementsAreZero, getLongestLineInMatrix} from "@/core/algorithms/arra
 import Polynomial from "@/core/domain/math/classes/Polynomial";
 import {TargetFunction} from "@/core/domain/math/classes/simplex/TargetFunction";
 import {ExtremumType} from "@/core/domain/math/enums/ExtremumType";
+import {Rational} from "@/core/domain/math/classes/Rational";
+import {fromRationalString} from "@/core/algorithms/numberhelper";
 
 export async function readFileAsSimplexEntities(
     filepath: string
@@ -24,10 +26,10 @@ export async function readFileAsSimplexEntities(
 }
 
 export async function writeToFile(
-    source: {target: TargetFunction, constraints: Array<Equation>},
+    source: { target: TargetFunction, constraints: Array<Equation> },
     filepath: string
 ) {
-    const result: {message: string | undefined} = {message: undefined}
+    const result: { message: string | undefined } = {message: undefined}
     const targetAsString = source.target
         .func.coefficients.map((coefficient) => coefficient.multiplier)
         .concat(source.target.func.constant)
@@ -41,12 +43,16 @@ export async function writeToFile(
         })
         .join('\n')
 
-    fs.writeFile(filepath, targetAsString + '\n' + constraintsAsString, {},(err) => {
-        if (err) {
-            result.message = `Error while saving: ${err}`
-        }
-        return undefined
-    })
+    fs.writeFile(
+        filepath,
+        targetAsString + '\n' + constraintsAsString,
+        {},
+        (err) => {
+            if (err) {
+                result.message = `Error while saving: ${err}`
+            }
+            return undefined
+        })
 
     return result
 }
@@ -61,10 +67,12 @@ function convertDataToSimplexEntities(
         const updatedRow: Array<number> = []
 
         line.forEach((el) => {
-            const updatedElement = Number(el)
-            if (updatedElement !== Number.NaN) {
-                updatedRow.push(updatedElement)
+            let num = Number(el)
+            if (Rational.isRational(el)) {
+                num = fromRationalString(el)
             }
+
+            updatedRow.push(num)
         })
 
         if (updatedRow.length > 0) {
@@ -85,7 +93,7 @@ function convertDataToSimplexEntities(
 
 function convertIntoEquations(
     minLength: number, multipliers: Array<Array<number>>
-) : Array<Equation> {
+): Array<Equation> {
     const equations: Array<Equation> = []
 
     for (const multiplierLine of multipliers) {
@@ -111,7 +119,7 @@ function convertIntoEquations(
 
 function convertIntoTargetFunction(
     minLength: number, numbers: Array<number>
-) : TargetFunction {
+): TargetFunction {
     const updatedArray = Array(minLength).fill(0)
     numbers.forEach((el, index) => {
         updatedArray[index] = el

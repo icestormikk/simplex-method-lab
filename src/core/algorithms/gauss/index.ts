@@ -1,4 +1,4 @@
-import {GaussState} from "./modes";
+import {GaussState} from "./gaussState";
 import {Matrix} from "@/core/domain/math/aliases/Matrix";
 
 export let REVERSE_NUMBER_SIGN = false
@@ -47,7 +47,9 @@ export default function gauss(
     }
 
     for (const columnIndex of immutableReverse(selectedColumns)) {
+        console.log(columnIndex)
         const i = selectedColumns.indexOf(columnIndex)
+        console.log(i)
         for (let j = 0; j < i; j++) {
             if (matrix[i][columnIndex] === 0) {
                 continue

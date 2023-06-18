@@ -14,19 +14,22 @@ function getRestructuredConstraintsInfo(inequalities: Inequality[], board: JXG.B
         .find((el) =>
             el.polynomial.coefficients.filter((coef) =>
                 coef.multiplier !== 0
-            ).length === 2
+            ).length <= 2
         )
         ?.polynomial.coefficients
         .filter((el) => el.multiplier !== 0)
         .map((el) => el.index) || [0, 1]
+    console.log(axisIndexes)
 
     inequalities.forEach((line) => {
+        console.log('COEFS: ' + line.polynomial.coefficients.map((el) => el.multiplier))
         const a = line.polynomial.coefficients.find((el) =>
             el.index === axisIndexes[0]
         )?.multiplier || 0
         const b = line.polynomial.coefficients.find((el) =>
             el.index === axisIndexes[1]
         )?.multiplier || 1
+        console.log(line.polynomial.constant, a, b)
 
         const l = board.create(
             'line',

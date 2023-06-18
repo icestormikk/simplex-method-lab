@@ -8,8 +8,6 @@ export function graphicalMethod(
     target: TargetFunction,
     constraints: Array<Equation>
 ) {
-    // add some checks ?
-
     const copiedConstraints = copyConstraints(constraints)
     const copiedTargetFunction = target.copy()
     const constraintsMatrix = Equation.toMatrix(copiedConstraints)
@@ -23,15 +21,11 @@ export function graphicalMethod(
         const column = selectedColumnIndexes[index]
         const solved = constraint.solveByCoefficient(column)
         constraintsList.push(solved)
+
+        // console.log(solved.coefficients.filter((el) => el.multiplier !== 0).length)
         copiedTargetFunction.func.replaceCoefficientByIndex(column, solved)
     })
 
-    console.log(
-        constraintsList.map((cons) => cons.toString())
-    )
-    console.log(
-        copiedTargetFunction.toString()
-    )
     return {
         updatedTarget: copiedTargetFunction,
         constraintsList

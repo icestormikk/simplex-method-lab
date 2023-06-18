@@ -22,7 +22,6 @@ function DownloadModalContent() {
                 if (res.message !== undefined) {
                     setErrorMessage(res.message)
                 } else {
-                    console.log('suc')
                     setFinalMessage("Файл успешно сохранён")
                 }
             })

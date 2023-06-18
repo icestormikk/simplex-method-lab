@@ -1,7 +1,9 @@
 import React from 'react';
-import {Rational} from "@/core/domain/math/classes/Rational";
 import SimplexMatrix from "@/core/domain/math/classes/simplex/SimplexMatrix";
 import {MatrixElement} from "@/core/domain/math/aliases/MatrixElement";
+import {useAppSelector} from "@/redux/hooks";
+import {FractionView} from "@/core/domain/math/enums/FractionView";
+import {Rational} from "@/core/domain/math/classes/Rational";
 
 interface SimpleMatrixTableProps<T> {
     matrix: SimplexMatrix,
@@ -13,6 +15,8 @@ interface SimpleMatrixTableProps<T> {
 function SimplexMatrixTable(
     {matrix, selectedElement, possibleBearingElements, setPickedElement}: SimpleMatrixTableProps<number>
 ) {
+    const viewMode = useAppSelector((state) => state.main.fractionViewMode)
+
 
     const isPossibleElement = (row: number, column: number) => {
         const index = possibleBearingElements.findIndex((el) =>
@@ -33,7 +37,7 @@ function SimplexMatrixTable(
     }
 
     return (
-        <table className="simplex-matrix-table text-2xl">
+        <table className="simplex-matrix-table text-xl">
             <tbody>
                 <tr>
                     <td></td>
@@ -70,7 +74,13 @@ function SimplexMatrixTable(
                                             })
                                         }}
                                     >
-                                        {Rational.fromNumber(element).toString()}
+                                        {
+                                            viewMode === FractionView.RATIONAL ? (
+                                                Rational.fromNumber(element).toString()
+                                            ) : (
+                                                element
+                                            )
+                                        }
                                     </td>
                                 ))
                             }
